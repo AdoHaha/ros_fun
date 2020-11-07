@@ -6,6 +6,7 @@ services:
             - $PWD/jupyter_notebooks:/home/ubuntu/turtlebot3_ws/src/jupyter_notebooks
         ports: 
             - 6080:80
+            - 8888:8888
         shm_size: '2gb'
     
     
