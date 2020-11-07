@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+    ros2:
+        build: .
+        volumes:
+            - $PWD/jupyter_notebooks:/home/ubuntu/turtlebot3_ws/src/jupyter_notebooks
+        ports: 
+            - 6080:80
+        shm_size: '2gb'
+    
+    
+      
