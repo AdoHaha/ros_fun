@@ -15,3 +15,7 @@ WORKDIR /home/ubuntu/turtlebot3_ws
 COPY setup.bash /home/ubuntu/setup.bash
 RUN ["/bin/bash", "-c", "/home/ubuntu/setup.bash"]
 COPY jupyter_notebook_config.py /home/ubuntu/.jupyter/jupyter_notebook_config.py
+ENV USER root
+RUN pip3 install RISE
+ENV USER ubuntu
+RUN jupyter-nbextension install rise --py --sys-prefix
