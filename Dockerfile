@@ -14,7 +14,7 @@ RUN apt-get install ros-dashing-cartographer --yes
 RUN apt-get install ros-dashing-cartographer-ros --yes
 RUN apt-get install ros-dashing-navigation2 --yes
 RUN apt-get install ros-dashing-nav2-bringup --yes
-ADD ./rviz_nav.rviz /opt/ros/dashing/share/nav2_bringup/rviz/nav2_default_view.rviz
+ADD ./jupyter_notebooks/rviz_nav.rviz /opt/ros/dashing/share/nav2_bringup/rviz/nav2_default_view.rviz
 ENV USER ubuntu
 #from https://automaticaddison.com/how-to-install-and-launch-ros2-using-docker/
 RUN mkdir -p ~/turtlebot3_ws/src

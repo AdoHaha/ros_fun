@@ -10,7 +10,7 @@ Use
 
 Also, run 
 
-`docker container exec -it--user ubuntu fun_ros_ros2_1  jupyter notebook --notebook-dir="./src/jupyter_notebooks"`
+`docker container exec -it --user ubuntu ros_fun_ros2_1 bash -i /home/ubuntu/run_jupyter.sh`
 
 to start jupyter inside the container.
 
