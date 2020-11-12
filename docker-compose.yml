@@ -1,7 +1,7 @@
 version: "3"
 services:
     ros2:
-        build: .
+        image: adohaha/fun_ros:presentation
         volumes:
             - $PWD/jupyter_notebooks:/home/ubuntu/turtlebot3_ws/src/jupyter_notebooks
         ports: 
