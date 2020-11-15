@@ -8,6 +8,7 @@ services:
             - 6080:80
             - 8888:8888
         shm_size: '2gb'
+        container_name: ros_fun
     
     
       
