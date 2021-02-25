@@ -1,4 +1,4 @@
-FROM tiryoh/ros2-desktop-vnc:dashing
+FROM tiryoh/ros-desktop-vnc:noetic
 LABEL maintainer igorzubrycki@gmail.com
 
 ENV USER root
@@ -10,19 +10,22 @@ RUN pip3 install --upgrade pip
 RUN pip3 install notebook
 RUN pip3 install RISE
 RUN pip3 install opencv-contrib-python
-RUN apt-get install ros-dashing-cartographer --yes
-RUN apt-get install ros-dashing-cartographer-ros --yes
-RUN apt-get install ros-dashing-navigation2 --yes
-RUN apt-get install ros-dashing-nav2-bringup --yes
-ADD ./jupyter_notebooks/rviz_nav.rviz /opt/ros/dashing/share/nav2_bringup/rviz/nav2_default_view.rviz
-ENV USER ubuntu
+RUN apt-get --yes install ros-noetic-joy ros-noetic-teleop-twist-joy \
+  ros-noetic-teleop-twist-keyboard ros-noetic-laser-proc \
+  ros-noetic-rgbd-launch ros-noetic-rosserial-arduino \
+  ros-noetic-rosserial-python ros-noetic-rosserial-client \
+  ros-noetic-rosserial-msgs ros-noetic-amcl ros-noetic-map-server \
+  ros-noetic-move-base ros-noetic-urdf ros-noetic-xacro \
+  ros-noetic-compressed-image-transport ros-noetic-rqt-image-view \
+  ros-noetic-gmapping ros-noetic-navigation ros-noetic-interactive-markers 
+#ADD ./jupyter_notebooks/rviz_nav.rviz /opt/ros/noetic/share/nav2_bringup/rviz/nav2_default_view.rviz
+ENV USER ubuntu #
 #from https://automaticaddison.com/how-to-install-and-launch-ros2-using-docker/
-RUN mkdir -p ~/turtlebot3_ws/src
-WORKDIR /home/ubuntu/turtlebot3_ws
-ADD ./jupyter_notebooks /home/ubuntu/turtlebot3_ws/src/jupyter_notebooks
+RUN mkdir -p /home/ubuntu/catkin_ws/src
+WORKDIR /home/ubuntu/catkin_ws
+ADD ./jupyter_notebooks /home/ubuntu/catkin_ws/src/jupyter_notebooks
 ADD ./run_jupyter.sh /home/ubuntu/run_jupyter.sh
 COPY setup.bash /home/ubuntu/setup.bash
 RUN ["/bin/bash", "-c", "/home/ubuntu/setup.bash"]
 COPY jupyter_notebook_config.py /home/ubuntu/.jupyter/jupyter_notebook_config.py
 RUN jupyter-nbextension install rise --py --sys-prefix
-ADD ./turtlebot3_lds_2d.lua /home/ubuntu/turtlebot3_ws/src/turtlebot3/turtlebot3_cartographer/turtlebot3_lds_2d.lua

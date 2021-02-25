@@ -1,9 +1,9 @@
 version: "3"
 services:
-    ros2:
-        image: adohaha/fun_ros:presentation
+    ros1:
+        image: adohaha/fun_ros_1
         volumes:
-            - $PWD/jupyter_notebooks:/home/ubuntu/turtlebot3_ws/src/jupyter_notebooks
+            - $PWD/jupyter_notebooks:/home/ubuntu/catkin_ws/src/jupyter_notebooks
         ports: 
             - 6080:80
             - 8888:8888
