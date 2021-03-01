@@ -3,7 +3,7 @@ services:
     ros1:
         image: adohaha/fun_ros:ros1
         volumes:
-            - $PWD/jupyter_notebooks:/home/ubuntu/catkin_ws/src/jupyter_notebooks
+            - ./jupyter_notebooks:/home/ubuntu/catkin_ws/src/jupyter_notebooks
         ports: 
             - 6080:80
             - 8888:8888
