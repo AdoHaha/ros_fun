@@ -9,7 +9,7 @@ RUN apt-get install -y python3-pip #
 RUN pip3 install --upgrade pip
 RUN pip3 install notebook
 RUN pip3 install RISE
-RUN pip3 install opencv-contrib-python
+RUN pip3 install opencv-contrib-python ipywidgets
 RUN apt-get --yes install ros-noetic-joy ros-noetic-teleop-twist-joy \
   ros-noetic-teleop-twist-keyboard ros-noetic-laser-proc \
   ros-noetic-rgbd-launch ros-noetic-rosserial-arduino \
@@ -17,7 +17,8 @@ RUN apt-get --yes install ros-noetic-joy ros-noetic-teleop-twist-joy \
   ros-noetic-rosserial-msgs ros-noetic-amcl ros-noetic-map-server \
   ros-noetic-move-base ros-noetic-urdf ros-noetic-xacro \
   ros-noetic-compressed-image-transport ros-noetic-rqt-image-view \
-  ros-noetic-gmapping ros-noetic-navigation ros-noetic-interactive-markers 
+  ros-noetic-gmapping ros-noetic-navigation ros-noetic-interactive-markers  \
+  ros-noetic-teb-local-planner
 #ADD ./jupyter_notebooks/rviz_nav.rviz /opt/ros/noetic/share/nav2_bringup/rviz/nav2_default_view.rviz
 ENV USER ubuntu
 #from https://automaticaddison.com/how-to-install-and-launch-ros2-using-docker/
