@@ -1,14 +1,14 @@
 version: "3"
 services:
     ros1:
-        image: adohaha/fun_ros_1
+        image: adohaha/fun_ros:ros1
         volumes:
             - $PWD/jupyter_notebooks:/home/ubuntu/catkin_ws/src/jupyter_notebooks
         ports: 
             - 6080:80
             - 8888:8888
         shm_size: '2gb'
-        container_name: ros_fun
+        container_name: ros_fun_1
     
     
       
