@@ -4,6 +4,8 @@ Robotics are fun and ROS 2 is a must.
 
 In this presentation I present a way to start, 100 % Python and Jupyter based.
 
+You need to have Docker and docker-compose installed.
+
 Use 
 
 `docker-compose up ` to run the container.
