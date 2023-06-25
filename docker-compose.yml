@@ -2,8 +2,11 @@ version: "3"
 services:
     ros2:
         image: adohaha/fun_ros:foxy
+        environment:
+            TZ: "Europe/Warsaw"
         volumes:
-            - $PWD/jupyter_notebooks:/home/ubuntu/turtlebot3_ws/src/jupyter_notebooks
+            - ./Desktop:/home/ubuntu/Desktop
+            - ./jupyter_notebooks:/home/ubuntu/turtlebot3_ws/src/jupyter_notebooks
         ports: 
             - 6080:80
             - 8888:8888
