@@ -2,12 +2,12 @@
 
 Robotics are fun and ROS 2 is a must.
 
-In this presentation I present a way to start with ROS 2 using Python: 100 % Python and Jupyter based.
+In this workshop we will play around with ROS 2 and Simulating some robots
 
 You need to have Docker and docker-compose installed. I suggest cloning this repository.
 
 
-`git clone https://github.com/AdoHaha/ros_fun`
+`git clone https://github.com/AdoHaha/ros_fun -b humble_pycon`
 `cd ros_fun`
 
 Use 
@@ -32,4 +32,4 @@ on your **host** machine.
 
 From there open [*fun_with_ROS_2.ipynb*](http://localhost:8888/fun_with_ROS_2.ipynb) to access the presentation and demos.
 
-The demo uses ROS Foxy
+The demo uses ROS Humble

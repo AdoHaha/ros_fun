@@ -1,0 +1,31 @@
+Gazebo multi-robot simulator, version 11.10.2
+Copyright (C) 2012 Open Source Robotics Foundation.
+Released under the Apache 2 License.
+http://gazebosim.org
+
+
+(1687500104 165743919) [Msg] Waiting for master.
+(1687500104 168760994) [Msg] Connected to gazebo master @ http://127.0.0.1:11345
+(1687500104 168781307) [Msg] Publicized address: 192.168.64.2
+(1687500104 974203353) [Msg] Loading world file [/home/ubuntu/turtlebot3_ws/install/nav2_bringup/share/nav2_bringup/worlds/world_only.model]
+(1687500105 259545535) [Err] [OpenAL.cc:84] Unable to open audio device[default]
+ Audio will be disabled.
+(1687500105 535452759) Init world[default]
+(1687500105 638651039) applying Gaussian noise model with mean 0, stddev 0.0002, bias 0
+(1687500105 638690979) applying Gaussian noise model with mean 0, stddev 0.0002, bias 0
+(1687500105 638726731) applying Gaussian noise model with mean 0, stddev 0.0002, bias 0
+(1687500105 638743838) Applying angular velocity noise to IMU[tb3_imu].
+  X: Gaussian noise, mean[0], stdDev[0.0002] bias[0] dynamicBiasStdDev[0] dynamicBiasCorrTime[0] precision[0] quantized[0]
+  Y: Gaussian noise, mean[0], stdDev[0.0002] bias[0] dynamicBiasStdDev[0] dynamicBiasCorrTime[0] precision[0] quantized[0]
+  Z: Gaussian noise, mean[0], stdDev[0.0002] bias[0] dynamicBiasStdDev[0] dynamicBiasCorrTime[0] precision[0] quantized[0]
+(1687500105 638753824) applying Gaussian noise model with mean 0, stddev 0.017, bias 0
+(1687500105 638771919) applying Gaussian noise model with mean 0, stddev 0.017, bias 0
+(1687500105 638789896) applying Gaussian noise model with mean 0, stddev 0.017, bias 0
+(1687500105 638806802) Applying linear acceleration noise to IMU[tb3_imu].
+  X: Gaussian noise, mean[0], stdDev[0.017] bias[0] dynamicBiasStdDev[0] dynamicBiasCorrTime[0] precision[0] quantized[0]
+  Y: Gaussian noise, mean[0], stdDev[0.017] bias[0] dynamicBiasStdDev[0] dynamicBiasCorrTime[0] precision[0] quantized[0]
+  Z: Gaussian noise, mean[0], stdDev[0.017] bias[0] dynamicBiasStdDev[0] dynamicBiasCorrTime[0] precision[0] quantized[0]
+(1687500105 760212987) applying Gaussian noise model with mean 0, stddev 0.01, bias 0
+(1687500106 337346928) [Wrn] [Event.cc:61] Warning: Deleting a connection right after creation. Make sure to save the ConnectionPtr from a Connect call
+(1687500113 102667362) [Wrn] [Publisher.cc:135] Queue limit reached for topic /gazebo/default/pose/local/info, deleting message. This warning is printed only once.
+(1687503814 503259694) [Wrn] [Publisher.cc:135] Queue limit reached for topic /gazebo/default/physics/contacts, deleting message. This warning is printed only once.

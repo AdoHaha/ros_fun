@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'jupyter_notebooks'
+package_name = 'ros_fun'
 
 setup(
     name=package_name,
@@ -13,14 +13,13 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='igor',
-    maintainer_email='igorzubrycki@gmail.com',
+    maintainer='ubuntu',
+    maintainer_email='ubuntu@todo.todo',
     description='TODO: Package description',
-    license='MIT',
+    license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'standalone_node = jupyter_notebooks.standalone_node:main'
         ],
     },
 )
