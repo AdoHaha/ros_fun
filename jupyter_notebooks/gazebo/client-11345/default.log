@@ -1,0 +1,17 @@
+Gazebo multi-robot simulator, version 11.10.2
+Copyright (C) 2012 Open Source Robotics Foundation.
+Released under the Apache 2 License.
+http://gazebosim.org
+
+
+(1687282813 164505382) [Msg] Waiting for master.
+(1687282813 264409032) Failed to create connection to remote host[localhost:11345]
+(1687282814 269733179) [Msg] Connected to gazebo master @ http://127.0.0.1:11345
+(1687282814 269792852) [Msg] Publicized address: 192.168.64.2
+(1687282814 270139221) [Wrn] [GuiIface.cc:298] Couldn't locate specified .ini. Creating file at "/home/ubuntu/.gazebo/gui.ini"
+(1687282814 270247797) Loaded .ini file from: "/home/ubuntu/.gazebo/gui.ini"
+(1687282816 619852959) [Wrn] [GuiIface.cc:120] QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-ubuntu'
+(1687282887 701170047) [Err] [GuiIface.cc:124] inotify_add_watch(/home/ubuntu/.gazebo/models) failed: (No space left on device)
+(1687282887 701459855) [Err] [GuiIface.cc:124] inotify_add_watch(/opt/ros/humble/share/turtlebot3_gazebo/models) failed: (No space left on device)
+(1687282888 371558431) [Wrn] [Event.cc:61] Warning: Deleting a connection right after creation. Make sure to save the ConnectionPtr from a Connect call
+(1687282889 184342950) No spacenav daemon found. Spacenav functionality is disabled
