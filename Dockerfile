@@ -48,3 +48,4 @@ RUN . /opt/ros/humble/setup.sh && rosdep install -y -r -q --from-paths src --ign
 
 RUN cd src && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
 RUN . /opt/ros/humble/setup.sh && colcon build --symlink-install
+RUN pip3 install bqplot
