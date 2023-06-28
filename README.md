@@ -39,6 +39,6 @@ access the jupyter notebooks by navigating to:
 
 on your **host** machine. 
 
-From there open [*fun_with_ROS_2.ipynb*](http://localhost:8888/exercises/1.%20introduction.ipynb) to access introduction
+From there open [*excercises folder*](http://localhost:8888/exercises/1.%20introduction.ipynb) to access introduction
 
 The demo uses ROS Humble
