@@ -1,7 +1,7 @@
 """
 Subscription class for jupyter-ros2 Project
 
-Author: zmk5 (Zahi Kakish)
+Author: zmk5 (Zahi Kakish), Igor Zubrycki
 
 """
 from typing import TypeVar
@@ -23,22 +23,21 @@ except ModuleNotFoundError:
 MsgType = TypeVar('MsgType')
 
 
+import threading
+
 class ThreadedSpinner():
   
     def __init__(self, node: Node) -> None:
     
         self.node = node
 
- 
-
-
     def __thread_target(self) -> None:
         while self.__thread_state:
             rclpy.spin_once(self.node, timeout_sec=0.1)
-        self.__widgets["out"].append_stdout("Done!\n")
 
-    def stop(self, _) -> None:
+    def stop(self) -> None:
         self.__thread_state = False
+        print("stopped spinning in thread")
 
     def spin_in_thread(self) -> None:
         self.__thread_state = True
