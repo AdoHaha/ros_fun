@@ -1,0 +1,12 @@
+Gazebo multi-robot simulator, version 11.10.2
+Copyright (C) 2012 Open Source Robotics Foundation.
+Released under the Apache 2 License.
+http://gazebosim.org
+
+
+(1687282813 784730233) [Msg] Waiting for master.
+(1687282813 785747454) [Msg] Connected to gazebo master @ http://127.0.0.1:11345
+(1687282813 785769277) [Msg] Publicized address: 192.168.64.2
+(1687282816 136246839) [Wrn] [ModelDatabase.cc:340] Getting models from[http://models.gazebosim.org/]. This may take a few seconds.
+(1687282886 994544837) [Msg] Loading world file [/opt/ros/humble/share/turtlebot3_gazebo/worlds/turtlebot3_world.world]
+(1687282887 497303128) Init world[default]

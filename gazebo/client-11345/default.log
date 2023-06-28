@@ -1,0 +1,14 @@
+Gazebo multi-robot simulator, version 11.10.2
+Copyright (C) 2012 Open Source Robotics Foundation.
+Released under the Apache 2 License.
+http://gazebosim.org
+
+
+(1687500103 294550376) [Msg] Waiting for master.
+(1687500103 296897810) Failed to create connection to remote host[localhost:11345]
+(1687500104 299770309) [Msg] Connected to gazebo master @ http://127.0.0.1:11345
+(1687500104 299801868) [Msg] Publicized address: 192.168.64.2
+(1687500104 300181490) Loaded .ini file from: "/home/ubuntu/.gazebo/gui.ini"
+(1687500104 719537179) [Wrn] [GuiIface.cc:120] QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-ubuntu'
+(1687500106 339859167) [Wrn] [Event.cc:61] Warning: Deleting a connection right after creation. Make sure to save the ConnectionPtr from a Connect call
+(1687500107 159945776) No spacenav daemon found. Spacenav functionality is disabled

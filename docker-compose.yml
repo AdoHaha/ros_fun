@@ -1,14 +1,14 @@
 version: "3"
 services:
     ros2:
-        image: adohaha/fun_ros:foxy
+        image: adohaha/fun_ros:humble_minim
         volumes:
-            - $PWD/jupyter_notebooks:/home/ubuntu/turtlebot3_ws/src/jupyter_notebooks
+            - ./jupyter_notebooks:/home/ubuntu/turtlebot3_ws/src/jupyter_notebooks
+            - ./gazebo:/home/ubuntu/.gazebo
         ports: 
             - 6080:80
             - 8888:8888
-        shm_size: '2gb'
+        shm_size: '512m'
         container_name: ros_fun
-        command: "bash -i /home/ubuntu/run_jupyter.sh"
-    
+        privileged: true
       
