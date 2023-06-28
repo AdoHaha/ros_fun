@@ -4,15 +4,24 @@ Robotics are fun and ROS 2 is a must.
 
 In this workshop we will play around with ROS 2 and Simulating some robots
 
-You need to have Docker and docker-compose installed. I suggest cloning this repository.
+You need to have Docker and docker compose installed.
+It can be docker engine:
+Instructions for Ubuntu are provided [here](https://docs.docker.com/engine/install/ubuntu/)
+
+but for begginers easier option might be Docker Desktop: [Windows](https://docs.docker.com/desktop/install/windows-install/) [Linux](https://docs.docker.com/desktop/install/linux-install/), [Mac](https://docs.docker.com/desktop/install/mac-install/)
+
+
+
+ I suggest cloning this repository.
 
 
 `git clone https://github.com/AdoHaha/ros_fun -b humble_pycon`
+
 `cd ros_fun`
 
 Use 
 
-`docker-compose up ` to run the container.
+`docker compose up ` to run the container.
 
 Also, run 
 
@@ -30,6 +39,6 @@ access the jupyter notebooks by navigating to:
 
 on your **host** machine. 
 
-From there open [*fun_with_ROS_2.ipynb*](http://localhost:8888/fun_with_ROS_2.ipynb) to access the presentation and demos.
+From there open [*fun_with_ROS_2.ipynb*](http://localhost:8888/exercises/1.%20introduction.ipynb) to access introduction
 
 The demo uses ROS Humble
