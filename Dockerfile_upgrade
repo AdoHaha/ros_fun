@@ -1,0 +1,8 @@
+FROM adohaha/fun_ros:humble
+LABEL maintainer igorzubrycki@gmail.com
+
+
+ENV USER ubuntu
+
+RUN pip3 install bqplot
+RUN pip3 install tornado==6.1
