@@ -1,21 +1,25 @@
 # Fun with ROS 2
 
-Robotics are fun and ROS 2 is a must.
+Robotics is fun and ROS 2 is a must.
 
-In this workshop we will play around with ROS 2 and Simulating some robots
+In this workshop, we will play around with ROS 2 and Simulating some robots
 
 You need to have Docker and docker compose installed.
 It can be docker engine:
 Instructions for Ubuntu are provided [here](https://docs.docker.com/engine/install/ubuntu/)
 
-but for begginers easier option might be Docker Desktop: [Windows](https://docs.docker.com/desktop/install/windows-install/) [Linux](https://docs.docker.com/desktop/install/linux-install/), [Mac](https://docs.docker.com/desktop/install/mac-install/)
+but for beginners, an easier option might be Docker Desktop: [Windows](https://docs.docker.com/desktop/install/windows-install/) [Linux](https://docs.docker.com/desktop/install/linux-install/), [Mac](https://docs.docker.com/desktop/install/mac-install/)
 
+
+
+
+https://github.com/AdoHaha/ros_fun/assets/2242877/33d32bce-2f59-4905-88df-bea3bd0eb838
 
 
  I suggest cloning this repository.
 
 
-`git clone https://github.com/AdoHaha/ros_fun -b humble_pycon`
+`git clone https://github.com/AdoHaha/ros_fun`
 
 `cd ros_fun`
 
