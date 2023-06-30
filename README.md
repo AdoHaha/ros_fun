@@ -46,3 +46,7 @@ on your **host** machine.
 From there open [*exercises folder*](http://localhost:8888/exercises/1.%20introduction.ipynb) to access introduction
 
 The demo uses ROS Humble
+
+---
+
+[Presentation Robot Fun with ROS2 from PyCon PL](https://www.youtube.com/watch?v=K5yGKd7ig7A)
