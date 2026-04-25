@@ -1,8 +1,12 @@
-FROM adohaha/fun_ros:humble
+FROM adohaha/fun_ros:jazzy
 LABEL maintainer igorzubrycki@gmail.com
 
 
-ENV USER ubuntu
+USER root
 
-RUN pip3 install bqplot
-RUN pip3 install tornado==6.1
+RUN apt-get update -q && \
+    apt-get install -y --no-install-recommends python3-bqplot python3-tornado && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+USER ubuntu

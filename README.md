@@ -25,13 +25,7 @@ https://github.com/AdoHaha/ros_fun/assets/2242877/33d32bce-2f59-4905-88df-bea3bd
 
 Use 
 
-`docker compose up ` to run the container.
-
-Also, run 
-
-`docker container exec -it --user ubuntu ros_fun bash -i /home/ubuntu/run_jupyter.sh`
-
-to start jupyter inside the container.
+`docker compose up` to pull and run the ROS 2 Jazzy container.
 
 Access the virtual machine screen by navigating to 
 
@@ -45,7 +39,17 @@ on your **host** machine.
 
 From there open [*exercises folder*](http://localhost:8888/exercises/1.%20introduction.ipynb) to access introduction
 
-The demo uses ROS Humble
+The demo uses ROS 2 Jazzy on Ubuntu 24.04.
+
+## Maintainer image build
+
+The workshop compose file expects a prebuilt Docker Hub image so participants do
+not compile or install ROS packages locally. To publish a refreshed image, use:
+
+`make release`
+
+By default this builds and pushes `adohaha/fun_ros:jazzy`. Override the tag with
+`make release IMAGE=adohaha/fun_ros:<tag>`.
 
 ---
 
