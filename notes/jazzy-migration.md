@@ -5,7 +5,7 @@ This branch updates the workshop environment and notebooks for ROS 2 Jazzy on Ub
 ## Environment
 
 - Docker now uses the Jazzy desktop VNC base image.
-- The image installs Jazzy TurtleBot3, TurtleBot3 Gazebo, Nav2, Cartographer, and ROS-GZ packages.
+- The image installs Jazzy TurtleBot3, TurtleBot3 Gazebo, Nav2, Cartographer, ROS-GZ, and py_trees_ros packages.
 - `docker-compose.yml` runs the published `adohaha/fun_ros:jazzy` image so workshop users do not need to build locally.
 - Jupyter starts automatically inside the container after sourcing the ROS 2 Jazzy and workspace setup files.
 - `.gitignore` excludes colcon build output, Python bytecode, Jupyter checkpoints, and Gazebo runtime state.
@@ -20,6 +20,7 @@ This branch updates the workshop environment and notebooks for ROS 2 Jazzy on Ub
 - Unused old ROS distro image assets were removed.
 - Service examples now use services available in the Jazzy ROS-GZ TurtleBot3 launch.
 - The old Gazebo Classic reset-service helper path was removed because those services are not available in the Jazzy ROS-GZ TurtleBot3 launch.
+- Behavior tree examples use the image-provided `py_trees` and `py_trees_ros` packages instead of installing `py_trees` from a notebook cell.
 
 ## Runtime State
 

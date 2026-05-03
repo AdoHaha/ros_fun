@@ -25,6 +25,9 @@ RUN apt-get update -q && \
       ros-jazzy-cartographer-ros \
       ros-jazzy-navigation2 \
       ros-jazzy-nav2-bringup \
+      ros-jazzy-py-trees \
+      ros-jazzy-py-trees-ros \
+      ros-jazzy-py-trees-ros-interfaces \
       ros-jazzy-ros-gz \
       ros-jazzy-dynamixel-sdk \
       ros-jazzy-turtlebot3-msgs \
