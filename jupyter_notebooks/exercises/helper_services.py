@@ -1,4 +1,3 @@
-from std_srvs.srv import Empty
 from rclpy.node import Node
 
 from geometry_msgs.msg import PoseWithCovarianceStamped
@@ -89,43 +88,6 @@ def publish_initial_pose(
         publisher.publish(initial_pose)
         rclpy.spin_once(node, timeout_sec=0.1)
         time.sleep(0.1)
-
-
-def clear_simulate(node: Node):
-    # Create service clients
-    pause_client = node.create_client(Empty, "/pause_physics")
-    reset_client = node.create_client(Empty, "/reset_simulation")
-    unpause_client = node.create_client(Empty, "/unpause_physics")
-
-    # Create requests
-    pause_req = Empty.Request()
-    reset_req = Empty.Request()
-    unpause_req = Empty.Request()
-
-    # Check service availability and call services synchronously
-    if pause_client.wait_for_service(timeout_sec=10):
-        pause_future = pause_client.call_async(pause_req)
-        rclpy.spin_until_future_complete(node,pause_future)
-    else:
-        print('Failed to connect to the pause service')
-        return
-    if reset_client.wait_for_service(timeout_sec=10):
-        reset_future = reset_client.call_async(reset_req)
-        rclpy.spin_until_future_complete(node,reset_future)
-    else:
-        print('Failed to connect to the reset service')
-        return
-    if unpause_client.wait_for_service(timeout_sec=10):
-        unpause_future = unpause_client.call_async(unpause_req)
-        rclpy.spin_until_future_complete(node,unpause_future)
-    else:
-        print('Failed to connect to the unpause service')
-        return
-    # Confirm success of service calls
-    if pause_future.result() is not None and reset_future.result() is not None and unpause_future.result() is not None:
-        print('Simulation paused, reset, and unpaused successfully')
-    else:
-        print('Failed to pause, reset, or unpause simulation')
 
 
 def set_controller_frequency(node: Node,desired_freq=5.0):
