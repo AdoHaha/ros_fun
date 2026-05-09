@@ -1,51 +1,65 @@
-FROM tiryoh/ros2-desktop-vnc:humble
-LABEL maintainer igorzubrycki@gmail.com
+FROM tiryoh/ros2-desktop-vnc:jazzy
+LABEL maintainer="igorzubrycki@gmail.com"
 
-ENV USER root
+SHELL ["/bin/bash", "-c"]
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV ROS_DISTRO=jazzy
+ENV TURTLEBOT3_MODEL=waffle_pi
+ENV DISPLAY=:1.0
+
+USER root
+
 RUN apt-get update -q && \
-    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
-    apt-get autoclean && \
-    apt-get autoremove
-RUN apt-get install -y apt-utils
-RUN apt-get install -y --reinstall python3-pip
-RUN pip3 install --upgrade pip
-RUN pip3 install -U notebook
-RUN pip3 install -U RISE ipywidgets
-RUN pip3 install opencv-contrib-python
-RUN apt-get install ros-humble-cartographer --yes
-RUN apt-get install ros-humble-cartographer-ros --yes
-RUN apt-get install ros-humble-navigation2 --yes
-RUN apt-get install ros-humble-nav2-bringup --yes
-RUN apt-get install ros-humble-gazebo-* --yes
-RUN apt-get install ros-humble-dynamixel-sdk ros-humble-turtlebot3-msgs ros-humble-turtlebot3 ros-humble-turtlebot3-simulations ros-humble-turtlebot3-gazebo --yes
-ADD ./jupyter_notebooks/rviz_nav.rviz /opt/ros/humble/share/nav2_bringup/rviz/nav2_default_view.rviz
-RUN apt install chromium-browser -y
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+      apt-utils \
+      jupyter-notebook \
+      python3-pip \
+      python3-ipywidgets \
+      python3-opencv \
+      python3-bqplot \
+      python3-flask \
+      python3-natsort \
+      ros-jazzy-cartographer \
+      ros-jazzy-cartographer-ros \
+      ros-jazzy-navigation2 \
+      ros-jazzy-nav2-bringup \
+      ros-jazzy-py-trees \
+      ros-jazzy-py-trees-ros \
+      ros-jazzy-py-trees-ros-interfaces \
+      ros-jazzy-ros-gz \
+      ros-jazzy-dynamixel-sdk \
+      ros-jazzy-turtlebot3-msgs \
+      ros-jazzy-turtlebot3 \
+      ros-jazzy-turtlebot3-simulations \
+      ros-jazzy-turtlebot3-gazebo && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-ENV USER ubuntu
+# RISE is not packaged in Ubuntu Noble. Keep Notebook from apt so ROS Python
+# packages remain on the system interpreter, and install only the extension.
+RUN python3 -m pip install --break-system-packages --no-cache-dir RISE
 
-#from https://ubuntu.com/blog/simulate-the-turtlebot3
-RUN mkdir -p ~/turtlebot3_ws/src
+RUN mkdir -p /home/ubuntu/turtlebot3_ws/src /home/ubuntu/.jupyter && \
+    chown -R ubuntu:ubuntu /home/ubuntu/turtlebot3_ws /home/ubuntu/.jupyter
+
 WORKDIR /home/ubuntu/turtlebot3_ws
-ADD ./jupyter_notebooks /home/ubuntu/turtlebot3_ws/src/jupyter_notebooks
-ADD ./run_jupyter.sh /home/ubuntu/run_jupyter.sh
-COPY setup.bash /home/ubuntu/setup.bash
-RUN ["/bin/bash", "-c", "/home/ubuntu/setup.bash"]
-COPY jupyter_notebook_config.py /home/ubuntu/.jupyter/jupyter_notebook_config.py
-RUN jupyter-nbextension install rise --py --sys-prefix
-RUN jupyter nbextension enable rise --py --sys-prefix
-RUN jupyter nbextension enable --py widgetsnbextension
-RUN pip3 install -U --ignore-installed flask
-#ADD ./turtlebot3_lds_2d.lua /home/
-#RUN echo 'export ROS_DOMAIN_ID=30 #TURTLEBOT3' >> /home/ubuntu/.bashrc
-#RUN  echo "export TURTLEBOT3_MODEL=waffle_pi" >> /home/ubuntu/.bashrc
-#RUN echo "source /opt/ros/humble/setup.bash" >> /home/ubuntu/.bashrc
-#RUN echo "GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:/opt/ros/humble/share/turtlebot3_gazebo/models" >> /home/ubuntu/.bashrc
-#ADD ./turtlebot3_lds_2d.lua /home/
-ADD ./bashrc /home/ubuntu/.bashrc
 
-RUN cd /home/ubuntu/turtlebot3_ws/src && git clone https://github.com/ros-planning/navigation2.git --branch humble
-RUN . /opt/ros/humble/setup.sh && rosdep install -y -r -q --from-paths src --ignore-src --rosdistro humble
+COPY --chown=ubuntu:ubuntu ./jupyter_notebooks /home/ubuntu/turtlebot3_ws/src/jupyter_notebooks
+COPY --chown=ubuntu:ubuntu ./run_jupyter.sh /home/ubuntu/run_jupyter.sh
+COPY --chown=ubuntu:ubuntu ./setup.bash /home/ubuntu/setup.bash
+COPY --chown=ubuntu:ubuntu ./jupyter_notebook_config.py /home/ubuntu/.jupyter/jupyter_notebook_config.py
+COPY ./jupyter.supervisor.conf /etc/supervisor/conf.d/jupyter.conf
 
-RUN cd src && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
-RUN . /opt/ros/humble/setup.sh && colcon build --symlink-install
-RUN pip3 install bqplot
+USER ubuntu
+
+RUN /home/ubuntu/setup.bash
+
+USER root
+
+RUN jupyter-nbextension install rise --py --sys-prefix && \
+    jupyter nbextension enable rise --py --sys-prefix && \
+    jupyter nbextension enable --py widgetsnbextension
+
+USER root

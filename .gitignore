@@ -1,0 +1,23 @@
+# ROS 2 / colcon build products
+build/
+install/
+log/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Gazebo runtime state and downloaded model cache
+gazebo/
+jupyter_notebooks/gazebo/
+
+# Local environment and editor cruft
+.venv/
+venv/
+.DS_Store
+*.swp
+*.swo
