@@ -58,11 +58,12 @@ source /home/ubuntu/turtlebot3_ws/install/setup.bash
 
 - The upstream package name `py_trees_ros_tutorials` can conflict with an installed upstream package. The vendored copy in this repo is named `ros_fun_py_trees_ros_tutorials`.
 - Notebook launch examples should use the local package name `ros_fun`.
-- Qt dashboard nodes are not reliable for headless notebook exercises. Prefer driving the same behavior through ROS topics such as:
+- The mock robot launch starts the Qt dashboard. In the VNC desktop it should appear as a separate window when a tutorial launch file is started from a notebook terminal.
+- The same dashboard interactions can also be driven from notebook cells with ROS topics:
 
   ```bash
-  ros2 topic pub --once /dashboard/scan std_msgs/msg/Bool '{data: true}'
-  ros2 topic pub --once /dashboard/cancel std_msgs/msg/Bool '{data: true}'
+  ros2 topic pub --once /dashboard/scan std_msgs/msg/Empty '{}'
+  ros2 topic pub --once /dashboard/cancel std_msgs/msg/Empty '{}'
   ```
 
 ## Introspection Watchers
@@ -84,5 +85,8 @@ source /home/ubuntu/turtlebot3_ws/install/setup.bash
 - Before repeated ROS launch tests, clean up stale processes with a bracketed regex so the cleanup command does not match itself:
 
   ```bash
-  pkill -f '[r]os2 launch ros_fun|[p]y-trees-tree-watcher|[p]y-trees-blackboard-watcher|[t]ree-action-clients|[m]ock-battery|[m]ock-led-strip|[m]ock-docking-controller|[m]ock-move-base|[m]ock-rotation-controller|[m]ock-safety-sensors' 2>/dev/null || true
+  pattern='[r]os2 launch ros_fun|[p]y-trees-tree-watcher|[p]y-trees-blackboard-watcher|[t]ree-action-clients|[m]ock-battery|[m]ock-dashboard|[m]ock-led-strip|[m]ock-docking-controller|[m]ock-move-base|[m]ock-rotation-controller|[m]ock-safety-sensors'
+  pkill -TERM -f "$pattern" 2>/dev/null || true
+  sleep 1
+  pkill -KILL -f "$pattern" 2>/dev/null || true
   ```

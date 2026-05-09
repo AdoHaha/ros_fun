@@ -196,7 +196,7 @@ class Backend(qt_core.QObject):
         colour = "grey"
         if not msg.data:
             self.node.get_logger().info("no colour specified, setting '{}'".format(colour))
-        elif msg.data not in ["grey", "blue", "red", "green"]:
+        elif msg.data not in ["grey", "blue", "red", "green", "purple", "yellow", "white"]:
             self.node.get_logger().info("received unsupported LED colour '{0}', setting '{1}'".format(msg.data, colour))
         else:
             colour = msg.data

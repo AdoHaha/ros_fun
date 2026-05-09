@@ -33,10 +33,7 @@ def generate_launch_nodes() -> typing.List[launch_ros.actions.Node]:
         a list of the mock robot ros nodes as actions for launch
     """
     launch_nodes = []
-    # The original tutorials launch a Qt dashboard. In these notebooks the same
-    # interactions are driven from Jupyter cells, so keep the mock robot free of
-    # optional PyQt runtime dependencies.
-    for node_name in ['battery', 'docking_controller', 'led_strip',
+    for node_name in ['battery', 'dashboard', 'docking_controller', 'led_strip',
                       'move_base', 'rotation_controller', 'safety_sensors']:
         executable = "mock-{}".format(node_name.replace('_', '-'))
         launch_nodes.append(
