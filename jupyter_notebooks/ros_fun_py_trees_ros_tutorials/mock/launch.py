@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# License: BSD
+#   https://github.com/splintered-reality/ros_fun_py_trees_ros_tutorials/raw/devel/LICENSE
+#
+##############################################################################
+# Documentation
+##############################################################################
+
+"""
+Launch the mock robot.
+"""
+##############################################################################
+# Imports
+##############################################################################
+
+import typing
+
+import launch
+import launch_ros.actions
+
+##############################################################################
+# Helpers
+##############################################################################
+
+
+def generate_launch_nodes() -> typing.List[launch_ros.actions.Node]:
+    """
+    Generate an action node for launch.
+
+    Returns:
+        a list of the mock robot ros nodes as actions for launch
+    """
+    launch_nodes = []
+    # The original tutorials launch a Qt dashboard. In these notebooks the same
+    # interactions are driven from Jupyter cells, so keep the mock robot free of
+    # optional PyQt runtime dependencies.
+    for node_name in ['battery', 'docking_controller', 'led_strip',
+                      'move_base', 'rotation_controller', 'safety_sensors']:
+        executable = "mock-{}".format(node_name.replace('_', '-'))
+        launch_nodes.append(
+            launch_ros.actions.Node(
+                package='ros_fun',
+                name=node_name,
+                executable=executable,
+                output='screen',
+                emulate_tty=True
+            )
+        )
+    launch_nodes.append(launch.actions.LogInfo(msg=["Mock robot ready for py_trees tutorials."]))
+    return launch_nodes
+
+
+def generate_launch_description() -> launch.LaunchDescription:
+    """
+    Launch the mock robot (i.e. launch all mocked components).
+
+    Returns:
+        the launch description
+    """
+
+    return launch.LaunchDescription(generate_launch_nodes())
