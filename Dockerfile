@@ -38,8 +38,13 @@ RUN apt-get update -q && \
     rm -rf /var/lib/apt/lists/*
 
 # RISE is not packaged in Ubuntu Noble. Keep Notebook from apt so ROS Python
-# packages remain on the system interpreter, and install only the extension.
-RUN python3 -m pip install --break-system-packages --no-cache-dir RISE
+# packages remain on the system interpreter, and install only frontend assets
+# that the Ubuntu widget packages do not reliably expose to classic Notebook.
+RUN python3 -m pip install --break-system-packages --no-cache-dir \
+      RISE \
+      jupyterlab_widgets==3.0.9 && \
+    python3 -m pip install --break-system-packages --no-cache-dir --ignore-installed \
+      widgetsnbextension==4.0.9
 
 RUN mkdir -p /home/ubuntu/turtlebot3_ws/src /home/ubuntu/.jupyter && \
     chown -R ubuntu:ubuntu /home/ubuntu/turtlebot3_ws /home/ubuntu/.jupyter
@@ -60,6 +65,7 @@ USER root
 
 RUN jupyter-nbextension install rise --py --sys-prefix && \
     jupyter nbextension enable rise --py --sys-prefix && \
-    jupyter nbextension enable --py widgetsnbextension
+    jupyter nbextension install --py widgetsnbextension --sys-prefix && \
+    jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
 USER root
