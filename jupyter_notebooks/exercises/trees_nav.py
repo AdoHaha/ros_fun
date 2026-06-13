@@ -341,15 +341,15 @@ class PatrolCastle(py_trees.behaviour.Behaviour):
 def make_tree(context: DemoContext) -> py_trees.trees.BehaviourTree:
     root = py_trees.composites.Selector(name="Castle Demo", memory=False)
 
-    stopped = py_trees.composites.Sequence(name="STOPPED?", memory=True)
+    stopped = py_trees.composites.Sequence(name="STOPPED?", memory=False)
     stopped.add_children(
         [ModeIs(context, "tryb STOPPED?", DemoMode.STOPPED), CancelNavigation(context)]
     )
 
-    goal = py_trees.composites.Sequence(name="GOAL?", memory=True)
+    goal = py_trees.composites.Sequence(name="GOAL?", memory=False)
     goal.add_children([ModeIs(context, "tryb GOAL?", DemoMode.GOAL), NavigateToGoal(context)])
 
-    patrol = py_trees.composites.Sequence(name="PATROL fallback", memory=True)
+    patrol = py_trees.composites.Sequence(name="PATROL fallback", memory=False)
     patrol.add_children([ModeIs(context, "tryb PATROL?", DemoMode.PATROL), PatrolCastle(context)])
 
     root.add_children([stopped, goal, patrol])
