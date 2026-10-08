@@ -1,0 +1,488 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sdf version="1.9">
+  <world name="robo_restaurant">
+    <physics name="default" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+    </physics>
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics" />
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
+    <gravity>0 0 -9.81</gravity>
+    <light name="sun" type="directional">
+      <pose>0 0 8 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <direction>-0.3 0.2 -1</direction>
+    </light>
+    <model name="floor">
+      <static>true</static>
+      <pose>0 0 -0.1 0 0 0</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>12 10 0.2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>12 10 0.2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.65 0.67 0.7 1</ambient>
+            <diffuse>0.65 0.67 0.7 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="north_wall">
+      <static>true</static>
+      <pose>0 5 0.6 0 0 0</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>12 0.15 1.2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>12 0.15 1.2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.35 0.45 1</ambient>
+            <diffuse>0.3 0.35 0.45 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="south_wall">
+      <static>true</static>
+      <pose>0 -5 0.6 0 0 0</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>12 0.15 1.2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>12 0.15 1.2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.35 0.45 1</ambient>
+            <diffuse>0.3 0.35 0.45 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="east_wall">
+      <static>true</static>
+      <pose>6 0 0.6 0 0 0</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.15 10 1.2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.15 10 1.2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.35 0.45 1</ambient>
+            <diffuse>0.3 0.35 0.45 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="west_wall">
+      <static>true</static>
+      <pose>-6 0 0.6 0 0 0</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.15 10 1.2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.15 10 1.2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.35 0.45 1</ambient>
+            <diffuse>0.3 0.35 0.45 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="kitchen_counter">
+      <static>true</static>
+      <pose>-4 2 0.5 0 0 0</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.55 0.15 1</ambient>
+            <diffuse>0.8 0.55 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="cooker">
+      <static>true</static>
+      <pose>-4 3.6 0.5 0 0 0</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.2 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.2 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.75 0.25 0.15 1</ambient>
+            <diffuse>0.75 0.25 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="cook_robot">
+      <static>true</static>
+      <pose>-5.3 2.8 0.55 0 0 0</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1.1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1.1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.95 0.7 0.1 1</ambient>
+            <diffuse>0.95 0.7 0.1 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="washing_station">
+      <static>true</static>
+      <pose>-4 -2.5 0.5 0 0 0</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.55 0.85 1</ambient>
+            <diffuse>0.2 0.55 0.85 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="charging_dock">
+      <static>true</static>
+      <pose>0 -3.5 0.025 0 0 0</pose>
+      <link name="body">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.2 1 0.05</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.15 0.85 0.3 1</ambient>
+            <diffuse>0.15 0.85 0.3 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="table_1">
+      <static>true</static>
+      <pose>3 -2 0.55 0 0 0</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.4 1.4 1.1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.4 1.4 1.1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.55 0.3 0.15 1</ambient>
+            <diffuse>0.55 0.3 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="customer_robot_1">
+      <static>true</static>
+      <pose>4.4 -2 0.5 0 0 0</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.3 0.8 1</ambient>
+            <diffuse>0.3 0.3 0.8 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="table_1_service_zone">
+      <static>true</static>
+      <pose>1.6 -2 0.015 0 0 0</pose>
+      <link name="body">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.7 0.7 0.03</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.8 0.95 1</ambient>
+            <diffuse>0.3 0.8 0.95 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="table_2">
+      <static>true</static>
+      <pose>3 2 0.55 0 0 0</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.4 1.4 1.1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.4 1.4 1.1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.55 0.3 0.15 1</ambient>
+            <diffuse>0.55 0.3 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="customer_robot_2">
+      <static>true</static>
+      <pose>4.4 2 0.5 0 0 0</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.3 0.8 1</ambient>
+            <diffuse>0.3 0.3 0.8 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="table_2_service_zone">
+      <static>true</static>
+      <pose>1.6 2 0.015 0 0 0</pose>
+      <link name="body">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.7 0.7 0.03</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.8 0.95 1</ambient>
+            <diffuse>0.3 0.8 0.95 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="kitchen_service_zone">
+      <static>true</static>
+      <pose>-2.4 2 0.015 0 0 0</pose>
+      <link name="body">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.7 0.7 0.03</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.95 0.8 0.2 1</ambient>
+            <diffuse>0.95 0.8 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="waiter_proxy">
+      <static>true</static>
+      <pose>0 -3.5 0.35 0 0 0</pose>
+      <link name="body">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>.5 .5 .7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.7 0.75 1</ambient>
+            <diffuse>0.1 0.7 0.75 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="meal_1">
+      <static>true</static>
+      <pose>-4 2 -2 0 0 0</pose>
+      <link name="body">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>.25 .25 .15</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.95 0.3 1</ambient>
+            <diffuse>0.2 0.95 0.3 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="meal_2">
+      <static>true</static>
+      <pose>-3.5 2 -2 0 0 0</pose>
+      <link name="body">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>.25 .25 .15</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.95 0.3 1</ambient>
+            <diffuse>0.2 0.95 0.3 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="cooker_fault">
+      <static>true</static>
+      <pose>-4 3.6 -2 0 0 0</pose>
+      <link name="body">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>.3 .3 .3</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0.05 0.05 1</ambient>
+            <diffuse>1 0.05 0.05 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <gui fullscreen="0">
+      <plugin filename="MinimalScene" name="Restaurant overview">
+        <gz-gui>
+          <title>Restaurant overview</title>
+          <property type="string" key="state">docked</property>
+        </gz-gui>
+        <engine>ogre2</engine>
+        <scene>scene</scene>
+        <ambient_light>0.4 0.4 0.4</ambient_light>
+        <background_color>0.8 0.8 0.8</background_color>
+        <camera_pose>-10 -12 14 0 0.73 0.88</camera_pose>
+      </plugin>
+      <plugin filename="GzSceneManager" name="Scene Manager" />
+      <plugin filename="WorldControl" name="World control">
+        <play_pause>true</play_pause>
+        <step>true</step>
+        <start_paused>false</start_paused>
+        <service>/world/robo_restaurant/control</service>
+        <stats_topic>/world/robo_restaurant/stats</stats_topic>
+      </plugin>
+      <plugin filename="EntityTree" name="Entity tree" />
+    </gui>
+  </world>
+</sdf>
