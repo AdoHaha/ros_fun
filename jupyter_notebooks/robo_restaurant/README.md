@@ -36,39 +36,22 @@ Open the `exercises/` folder in Jupyter and continue with notebooks 12–14:
 
 Each notebook contains a runnable demonstration, a TODO function and checks.
 Unfinished answers print TODO; they are not counted as passed exercises.
-Instructor answers and solution notebooks are kept in `solutions/`. This instructor checkout includes the answers and verification tools.
+Instructor answers are maintained outside the student checkout.
 
-To run solution notebooks against a visible world, open the world with the
-command above, then set this in the solution notebook before the Gazebo cell:
-
-```python
-import os
-os.environ['ROBO_RESTAURANT_GAZEBO'] = 'live'
-```
-
-Gazebo and the notebook must use the same user and `GZ_PARTITION`. To test in a
-private headless world instead, use `'1'`. Each solution checks the live poses
-after every action and failure event. A green meal appears on the kitchen
-counter when ready, travels above the waiter when carried, and rests on the
-correct table when served. The red cube above the cooker appears on failure
-and disappears after repair. Proxies have no collisions and teleport; this
-does not verify physical driving, tray contact or device sensing.
-
-## Repeatable validation
+## Repeatable student validation
 
 Inside the sourced Jazzy workshop container, from `jupyter_notebooks`:
 
 ```bash
 python3 -m unittest discover -s robo_restaurant/tests -v
-ROBO_RESTAURANT_GAZEBO=1 python3 robo_restaurant/tools/verify_notebooks.py --output /tmp/restaurant-notebooks
-python3 robo_restaurant/tools/verify_gazebo.py
+python3 robo_restaurant/tools/verify_notebooks.py --output /tmp/restaurant-notebooks
 ```
 
-The notebook runner executes three untouched starters, three student notebooks
-filled with reference answers, and three instructor notebooks. Executed copies
-go to the output folder; student notebooks remain unexecuted. The Gazebo runner
-checks SDF validity, loaded entities, simulation statistics and all three
-solution traces in an isolated transport partition. See [review](REVIEW.md).
+The runner executes the three student demonstrations and confirms that unanswered
+exercise cells remain marked TODO. Executed copies go to the output folder.
+The separate instructor checkout contains completed solutions and full Gazebo
+integration checks. See [review](REVIEW.md) for the validation performed before
+student distribution.
 
 Service poses in world coordinates (metres; yaw chosen by the navigation adapter):
 

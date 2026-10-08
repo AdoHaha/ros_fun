@@ -55,9 +55,9 @@ publisher, asynchronous device operation or scikit-decide adapter yet. Those
 require a subsequent integration milestone; these tests make no claim about
 collision-free driving or sensor-based execution.
 
-Instructor code and solution notebooks are separate in `solutions/`. They have
-not yet been moved to an `ag2` branch. Student distribution should omit that
-folder and the instructor-only verification tools/tests.
+Student notebooks are now numbered 12–14 in `exercises/`. Instructor answers
+and full solution verification tools are maintained outside this student checkout.
+The results above refer to the full instructor validation before this separation.
 
 ## Reproduce
 
@@ -68,13 +68,9 @@ docker run --rm --entrypoint bash \
   -v "$PWD/jupyter_notebooks:/lab:ro" -w /lab \
   adohaha/fun_ros:jazzy -c '
     source /opt/ros/jazzy/setup.bash
-    export ROBO_RESTAURANT_GAZEBO=1
     /usr/bin/python3 -m unittest discover -s robo_restaurant/tests -v &&
-    /usr/bin/python3 -u robo_restaurant/tools/verify_notebooks.py --output /tmp/restaurant-notebooks &&
-    /usr/bin/python3 -u robo_restaurant/tools/verify_gazebo.py
+    /usr/bin/python3 -u robo_restaurant/tools/verify_notebooks.py --output /tmp/restaurant-notebooks
   '
 ```
 
-The headless integration checks create private transport partitions and stop
-their own servers. The optional `live` notebook mode deliberately modifies the
-already-open restaurant world so an instructor can inspect the execution.
+Full Gazebo solution checks are run from the separate instructor checkout.

@@ -17,8 +17,7 @@ setup(
     ],
     install_requires=['setuptools'],
     package_data={
-        'robo_restaurant': ['README.md', 'REVIEW.md', '*.ipynb', 'worlds/*.sdf'],
-        'robo_restaurant.solutions': ['*.ipynb'],
+        'robo_restaurant': ['README.md', 'REVIEW.md', 'worlds/*.sdf'],
         'ros_fun_py_trees_ros_tutorials': [
             'LICENSE.upstream',
             'README.ros_fun.md',
