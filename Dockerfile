@@ -21,6 +21,7 @@ RUN apt-get update -q && \
       python3-bqplot \
       python3-flask \
       python3-natsort \
+      graphviz \
       ros-jazzy-cartographer \
       ros-jazzy-cartographer-ros \
       ros-jazzy-navigation2 \

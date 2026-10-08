@@ -26,6 +26,10 @@ import py_trees
 import rclpy
 from geometry_msgs.msg import PoseStamped, TwistStamped
 from nav_msgs.msg import Odometry
+from lifecycle_msgs.srv import GetState
+from nav2_msgs.srv import ClearEntireCostmap
+from nav2_msgs.action import NavigateToPose
+from rcl_interfaces.srv import SetParameters
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
@@ -39,7 +43,8 @@ PATROL_WAYPOINTS = [
     (-0.25, -1.15, 1.57),
 ]
 
-GOAL_POSE = (0.50, -1.20, 0.0)
+# Face the direction of approach to keep the workshop demo short on slow hosts.
+GOAL_POSE = (0.50, -1.20, -1.57)
 
 
 class DemoMode(Enum):
@@ -89,6 +94,23 @@ class DemoState:
                 }
             )
 
+    def record(self, status: str, event: str, **data):
+        """Update feedback without overwriting an intent submitted by the UI."""
+        with self.lock:
+            self.status = status
+            self.events.append({"time": time.time(), "event": event,
+                                "mode": self.mode.value, "status": status, "data": data})
+
+    def transition(self, expected: DemoMode, mode: DemoMode, status: str, event: str):
+        """Complete a request only if it has not been superseded by another intent."""
+        with self.lock:
+            if self.mode != expected:
+                return False
+            self.mode, self.status = mode, status
+            self.events.append({"time": time.time(), "event": event,
+                                "mode": mode.value, "status": status, "data": {}})
+            return True
+
     def event_log(self) -> list[dict]:
         with self.lock:
             return list(self.events)
@@ -102,6 +124,157 @@ class DemoNode(Node):
         )
 
 
+def bounded_service_call(node, client, request, description, timeout_sec=8.0):
+    """Retry idempotent workshop services after missing replies, within a wall deadline."""
+    deadline = time.monotonic() + timeout_sec
+    reason = "service unavailable"
+    while time.monotonic() < deadline:
+        if not client.wait_for_service(timeout_sec=min(1.0, max(0.0, deadline - time.monotonic()))):
+            continue
+        future = client.call_async(request)
+        rclpy.spin_until_future_complete(
+            node, future, timeout_sec=min(2.0, max(0.0, deadline - time.monotonic()))
+        )
+        if not future.done():
+            reason = "service reply was not received"
+            client.remove_pending_request(future)
+            future.cancel()
+            continue
+        if future.exception() is not None:
+            reason = str(future.exception())
+            continue
+        return future.result()
+    raise TimeoutError(f"Timed out during {description}: {reason}. "
+                       "Restart simulation/navigation with its notebook cell and retry.")
+
+
+def configure_controller_frequency(node, desired_frequency=5.0):
+    client = node.create_client(SetParameters, "/controller_server/set_parameters")
+    request = SetParameters.Request()
+    request.parameters = [Parameter("controller_frequency", value=float(desired_frequency)).to_parameter_msg()]
+    try:
+        response = bounded_service_call(node, client, request, "controller frequency configuration")
+        if response is None or not response.results or not all(result.successful for result in response.results):
+            reasons = [result.reason for result in response.results] if response else ["empty reply"]
+            raise RuntimeError(f"Controller frequency configuration failed: {reasons}")
+    finally:
+        node.destroy_client(client)
+
+
+class WorkshopNavigator(BasicNavigator):
+    """BasicNavigator with a bounded startup, including retries for lost DDS replies."""
+
+    def waitUntilNav2Active(self, navigator="bt_navigator", localizer="amcl", timeout_sec=60.0):
+        deadline = time.monotonic() + timeout_sec
+        if localizer != "robot_localization":
+            self._wait_for_active_node(localizer, deadline)
+        if localizer == "amcl":
+            self._wait_for_initial_pose(deadline)
+        self._wait_for_active_node(navigator, deadline)
+        self.info("Nav2 is ready for use!")
+
+    def _await_action_reply(self, future, description, timeout_sec=2.0):
+        rclpy.spin_until_future_complete(self, future, timeout_sec=timeout_sec)
+        if not future.done():
+            raise TimeoutError(f"Nav2 timed out waiting for {description}. "
+                               "Restart navigation from its notebook cell.")
+        if future.exception() is not None:
+            raise RuntimeError(f"Nav2 {description} failed: {future.exception()}")
+        return future.result()
+
+    @staticmethod
+    def _cancel_late_goal(future):
+        # A goal accepted after our deadline must not begin an unowned navigation.
+        if not future.cancelled() and future.exception() is None:
+            handle = future.result()
+            if handle is not None and handle.accepted:
+                handle.cancel_goal_async()
+
+    def goToPose(self, pose, behavior_tree=""):
+        deadline = time.monotonic() + 5.0
+        while time.monotonic() < deadline:
+            if self.nav_to_pose_client.wait_for_server(
+                timeout_sec=min(1.0, max(0.0, deadline - time.monotonic()))
+            ):
+                break
+        else:
+            raise TimeoutError("Nav2 navigate_to_pose server unavailable; restart navigation in the notebook.")
+        goal = NavigateToPose.Goal()
+        goal.pose, goal.behavior_tree = pose, behavior_tree
+        self.feedback = None
+        future = self.nav_to_pose_client.send_goal_async(goal, self._feedbackCallback)
+        try:
+            handle = self._await_action_reply(future, "goal acknowledgement")
+        except TimeoutError:
+            future.add_done_callback(self._cancel_late_goal)
+            raise
+        self.goal_handle = handle
+        if handle is None or not handle.accepted:
+            return False
+        self.result_future = handle.get_result_async()
+        return True
+
+    def cancelTask(self):
+        if self.result_future and self.goal_handle:
+            self._await_action_reply(self.goal_handle.cancel_goal_async(), "cancellation acknowledgement")
+
+    def clearAllCostmaps(self):
+        # Both clears share one deadline, including when called during a tree tick.
+        deadline = time.monotonic() + 8.0
+        for client, description in [(self.clear_costmap_local_srv, "local costmap clearing"),
+                                    (self.clear_costmap_global_srv, "global costmap clearing")]:
+            bounded_service_call(self, client, ClearEntireCostmap.Request(), description,
+                                 timeout_sec=max(0.0, deadline - time.monotonic()))
+
+    def clearLocalCostmap(self):
+        bounded_service_call(self, self.clear_costmap_local_srv, ClearEntireCostmap.Request(),
+                             "local costmap clearing")
+
+    def clearGlobalCostmap(self):
+        bounded_service_call(self, self.clear_costmap_global_srv, ClearEntireCostmap.Request(),
+                             "global costmap clearing")
+
+    def _wait_for_active_node(self, node_name, deadline):
+        service = f"{node_name}/get_state"
+        client = self.create_client(GetState, service)
+        reason = "service unavailable"
+        try:
+            while time.monotonic() < deadline:
+                remaining = deadline - time.monotonic()
+                if not client.wait_for_service(timeout_sec=min(1.0, remaining)):
+                    continue
+                future = client.call_async(GetState.Request())
+                rclpy.spin_until_future_complete(
+                    self, future, timeout_sec=min(2.0, max(0.0, deadline - time.monotonic()))
+                )
+                if not future.done():
+                    reason = "no lifecycle response; DDS reply may have been lost"
+                    # Discard this request and try again instead of waiting forever.
+                    client.remove_pending_request(future)
+                    future.cancel()
+                    continue
+                if future.exception() is not None:
+                    reason = f"lifecycle request failed: {future.exception()}"
+                    continue
+                response = future.result()
+                if response is not None and response.current_state.label == "active":
+                    return
+                reason = f"node state is {response.current_state.label if response else 'unknown'}"
+                time.sleep(min(0.1, max(0.0, deadline - time.monotonic())))
+        finally:
+            self.destroy_client(client)
+        raise TimeoutError(f"Nav2 startup timed out waiting for {service}: {reason}. "
+                           "Run the simulation restart cell, then retry navigation setup.")
+
+    def _wait_for_initial_pose(self, deadline):
+        while not self.initial_pose_received and time.monotonic() < deadline:
+            self._setInitialPose()
+            rclpy.spin_once(self, timeout_sec=min(1.0, max(0.0, deadline - time.monotonic())))
+        if not self.initial_pose_received:
+            raise TimeoutError("Nav2 startup timed out waiting for AMCL pose. "
+                               "Check the simulation clock and restart navigation from its notebook cell.")
+
+
 @dataclass
 class DemoContext:
     node: Node
@@ -110,6 +283,45 @@ class DemoContext:
     waypoints: list[tuple[float, float, float]]
     goal: tuple[float, float, float]
     cmd_vel_publisher: object | None = None
+    navigation_owner: object | None = field(default=None, init=False)
+    patrol_waypoint_index: int = field(default=0, init=False)
+    cancellation_pending: bool = field(default=False, init=False)
+
+    def cancel_navigation(self, owner=None):
+        """Only the current owner may cancel the shared BasicNavigator task."""
+        if self.navigation_owner is None:
+            return
+        if owner is not None and self.navigation_owner is not owner:
+            return
+        if not self.cancellation_pending:
+            # cancelTask waits for acknowledgement, not the action's terminal result.
+            self.navigator.cancelTask()
+            self.cancellation_pending = True
+        previous = self.navigation_owner
+        self.navigation_owner = None
+        self.state.record("Poprzednie zadanie anulowane", "navigation_canceled", owner=previous.name)
+
+    def claim_navigation(self, owner):
+        # Selector ticks a new high-priority child BEFORE invalidating the old one.
+        # Transfer ownership here so its later terminate(INVALID) cannot cancel us.
+        self.cancel_navigation()
+        self.navigation_owner = owner
+
+    def navigation_ready(self):
+        """Poll cancellation completion before reusing the navigator action client."""
+        if self.cancellation_pending:
+            if not self.navigator.isTaskComplete():
+                return False
+            self.cancellation_pending = False
+        return True
+
+    def release_navigation(self, owner):
+        if self.navigation_owner is owner:
+            self.navigation_owner = None
+
+    def shutdown(self):
+        self.cancel_navigation()
+        self.publish_stop()
 
     def yaw_to_quaternion(self, yaw: float) -> tuple[float, float]:
         return math.sin(yaw / 2.0), math.cos(yaw / 2.0)
@@ -133,13 +345,9 @@ class DemoContext:
 
     def request_stop(self) -> str:
         self.state.set_mode(DemoMode.STOPPED, "Kliknięto: stop", "button_stop")
-        self.navigator.cancelTask()
-        self.publish_stop()
         return status_text(self.state)
 
     def request_patrol(self) -> str:
-        self.navigator.cancelTask()
-        self.publish_stop()
         self.state.set_mode(
             DemoMode.PATROL,
             "Cel wyczyszczony; patrol jako fallback",
@@ -147,7 +355,7 @@ class DemoContext:
         )
         return status_text(self.state)
 
-    def publish_stop(self, repeats: int = 5):
+    def publish_stop(self, repeats: int = 1):
         if self.cmd_vel_publisher is None:
             return
         msg = TwistStamped()
@@ -156,7 +364,8 @@ class DemoContext:
         for _ in range(repeats):
             msg.header.stamp = self.node.get_clock().now().to_msg()
             self.cmd_vel_publisher.publish(msg)
-            time.sleep(0.03)
+            if repeats > 1:
+                time.sleep(0.03)
 
 
 def status_text(state: DemoState) -> str:
@@ -179,179 +388,201 @@ class ModeIs(py_trees.behaviour.Behaviour):
 
 
 class CancelNavigation(py_trees.behaviour.Behaviour):
+    """Hold the stopped branch RUNNING until its guard becomes false."""
+
     def __init__(self, context: DemoContext, name="Anuluj nawigację"):
         super().__init__(name=name)
         self.context = context
 
     def initialise(self):
-        self.context.navigator.cancelTask()
+        self.context.cancel_navigation()
         self.context.publish_stop()
-        self.context.state.set_mode(
-            DemoMode.STOPPED,
-            "Nawigacja anulowana; robot zatrzymany",
-            "cancel_initialise",
-        )
+        self.context.state.record("Nawigacja anulowana; robot zatrzymany", "cancel_initialise")
 
     def update(self):
-        self.feedback_message = "Zażądano stopu"
+        self.feedback_message = "Robot zatrzymany"
         return py_trees.common.Status.RUNNING
 
 
 class NavigateToGoal(py_trees.behaviour.Behaviour):
+    """One Nav2 action: send on entry, poll while running, cancel on interruption.
+
+    Guards and recovery belong to the surrounding tree, not this leaf.
+    """
+
     def __init__(self, context: DemoContext, name="Jedź do celu"):
         super().__init__(name=name)
         self.context = context
         self.goal_sent = False
+        self.goal_pending = False
+        self.rejected = False
+
+    def target(self):
+        return self.context.goal
+
+    def sent_event(self):
+        return "goal_sent"
+
+    def result_event(self):
+        return "goal_result"
 
     def initialise(self):
-        self.context.navigator.cancelTask()
-        time.sleep(0.2)
-        self.context.navigator.goToPose(self.context.goal_pose())
+        self.goal_sent = False
+        self.goal_pending = True
+        self.rejected = False
+        self.context.claim_navigation(self)
+        self.send_when_ready()
+
+    def send_when_ready(self):
+        if not self.context.navigation_ready():
+            self.feedback_message = "Czekam na zakończenie anulowania poprzedniego zadania"
+            return
+        self.goal_pending = False
+        x, y, yaw = self.target()
+        try:
+            accepted = self.context.navigator.goToPose(self.context.make_pose(x, y, yaw))
+        except Exception:
+            self.context.release_navigation(self)
+            raise
+        if accepted is False:
+            self.rejected = True
+            self.context.release_navigation(self)
+            self.context.state.record("Nav2 odrzuciło cel", self.result_event(), result="REJECTED")
+            return
         self.goal_sent = True
-        x, y, _ = self.context.goal
-        self.context.state.set_mode(
-            DemoMode.GOAL,
-            f"Jadę do celu ({x:.2f}, {y:.2f})",
-            "goal_sent",
-            x=x,
-            y=y,
+        self.context.state.record(
+            f"{self.name}: ({x:.2f}, {y:.2f})", self.sent_event(),
+            x=x, y=y, waypoint=self.context.patrol_waypoint_index + 1,
         )
 
     def update(self):
-        mode, _, _ = self.context.state.snapshot()
-        if mode == DemoMode.STOPPED:
-            self.context.navigator.cancelTask()
-            self.context.publish_stop()
+        if self.goal_pending:
+            self.send_when_ready()
+            if self.goal_pending:
+                return py_trees.common.Status.RUNNING
+        if self.rejected:
+            self.feedback_message = "cel odrzucony"
             return py_trees.common.Status.FAILURE
-
-        if not self.goal_sent or not self.context.navigator.isTaskComplete():
+        if not self.context.navigator.isTaskComplete():
             feedback = self.context.navigator.getFeedback()
             if feedback is not None:
                 remaining = getattr(feedback, "estimated_time_remaining", None)
                 if remaining is not None:
-                    seconds = remaining.sec + remaining.nanosec / 1e9
-                    self.feedback_message = f"cel aktywny, około {seconds:.0f} s do końca"
+                    self.feedback_message = f"pozostało około {remaining.sec + remaining.nanosec / 1e9:.0f} s"
             return py_trees.common.Status.RUNNING
-
         result = self.context.navigator.getResult()
         self.goal_sent = False
-        self.context.state.set_mode(
-            self.context.state.snapshot()[0],
-            f"Wynik celu: {result}",
-            "goal_result",
-            result=str(result),
-        )
-        if result == TaskResult.SUCCEEDED:
-            self.context.state.set_mode(
-                DemoMode.PATROL,
-                "Cel osiągnięty; wracam do patrolu",
-                "goal_cleared_to_patrol",
-            )
-            self.feedback_message = "cel osiągnięty, patrol jako fallback"
-            return py_trees.common.Status.SUCCESS
-        if result == TaskResult.CANCELED:
-            self.context.state.set_mode(
-                DemoMode.PATROL,
-                "Cel anulowany; wracam do patrolu",
-                "goal_canceled_to_patrol",
-            )
-            self.feedback_message = "cel anulowany, wracam do patrolu"
-            return py_trees.common.Status.FAILURE
-        self.context.state.set_mode(
-            DemoMode.STOPPED,
-            "Cel nieudany; robot zatrzymany",
-            "goal_failed",
-            result=str(result),
-        )
-        self.feedback_message = "cel nieudany"
-        return py_trees.common.Status.FAILURE
+        self.context.release_navigation(self)
+        self.context.state.record(f"Wynik: {result}", self.result_event(), result=str(result))
+        self.feedback_message = str(result)
+        return (py_trees.common.Status.SUCCESS if result == TaskResult.SUCCEEDED
+                else py_trees.common.Status.FAILURE)
 
     def terminate(self, new_status):
-        mode, _, _ = self.context.state.snapshot()
-        if new_status == py_trees.common.Status.INVALID and self.goal_sent and mode == DemoMode.GOAL:
-            self.context.navigator.cancelTask()
+        if new_status == py_trees.common.Status.INVALID:
+            if self.goal_sent or self.goal_pending:
+                self.context.cancel_navigation(owner=self)
+            # Cancellation remains in the context when an unsent leaf is interrupted.
             self.goal_sent = False
+            self.goal_pending = False
+            self.rejected = False
 
 
-class PatrolCastle(py_trees.behaviour.Behaviour):
-    def __init__(self, context: DemoContext, name="Patrol zamku"):
-        super().__init__(name=name)
+class PatrolCastle(NavigateToGoal):
+    """Navigate to one patrol waypoint; progression is a separate tree leaf."""
+
+    def __init__(self, context: DemoContext, name="Punkt patrolu"):
+        super().__init__(context, name)
+
+    @property
+    def waypoint_index(self):
+        return self.context.patrol_waypoint_index
+
+    def target(self):
+        return self.context.waypoints[self.waypoint_index]
+
+    def sent_event(self):
+        return "patrol_goal_sent"
+
+    def result_event(self):
+        return "patrol_result"
+
+
+class ClearCostmaps(py_trees.behaviour.Behaviour):
+    def __init__(self, context, name="Wyczyść costmapy"):
+        super().__init__(name)
         self.context = context
-        self.goal_sent = False
-        self.waypoint_index = 0
-
-    def send_next_waypoint(self):
-        x, y, yaw = self.context.waypoints[self.waypoint_index]
-        self.context.navigator.goToPose(self.context.make_pose(x, y, yaw))
-        self.goal_sent = True
-        self.context.state.set_mode(
-            DemoMode.PATROL,
-            f"Patrol: punkt {self.waypoint_index + 1}/{len(self.context.waypoints)}",
-            "patrol_goal_sent",
-            waypoint=self.waypoint_index + 1,
-            x=x,
-            y=y,
-        )
-
-    def initialise(self):
-        if not self.goal_sent:
-            self.send_next_waypoint()
 
     def update(self):
-        mode, _, cycles = self.context.state.snapshot()
-        if mode != DemoMode.PATROL:
-            self.context.navigator.cancelTask()
-            self.goal_sent = False
-            return py_trees.common.Status.FAILURE
-
-        if not self.goal_sent or not self.context.navigator.isTaskComplete():
-            feedback = self.context.navigator.getFeedback()
-            if feedback is not None:
-                remaining = getattr(feedback, "estimated_time_remaining", None)
-                if remaining is not None:
-                    seconds = remaining.sec + remaining.nanosec / 1e9
-                    self.feedback_message = (
-                        f"cykl {cycles}, punkt {self.waypoint_index + 1}, "
-                        f"około {seconds:.0f} s do końca"
-                    )
-            return py_trees.common.Status.RUNNING
-
-        result = self.context.navigator.getResult()
-        self.goal_sent = False
-        if result == TaskResult.SUCCEEDED:
-            self.waypoint_index = (self.waypoint_index + 1) % len(self.context.waypoints)
-            if self.waypoint_index == 0:
-                self.context.state.add_patrol_cycle()
-            self.send_next_waypoint()
-            return py_trees.common.Status.RUNNING
-        if result == TaskResult.CANCELED:
-            self.feedback_message = "patrol anulowany"
-            return py_trees.common.Status.FAILURE
-        self.feedback_message = "patrol nieudany; czyszczę costmapy i spróbuję ponownie"
         self.context.navigator.clearAllCostmaps()
-        return py_trees.common.Status.FAILURE
+        self.context.state.record("Costmapy wyczyszczone; jedna ponowna próba", "costmaps_cleared")
+        return py_trees.common.Status.SUCCESS
 
-    def terminate(self, new_status):
-        mode, _, _ = self.context.state.snapshot()
-        if new_status == py_trees.common.Status.INVALID and self.goal_sent and mode == DemoMode.PATROL:
-            self.context.navigator.cancelTask()
-            self.goal_sent = False
+
+class ChangeMode(py_trees.behaviour.Behaviour):
+    def __init__(self, context, expected, target, name, event):
+        super().__init__(name)
+        self.context, self.expected, self.target, self.event = context, expected, target, event
+
+    def update(self):
+        changed = self.context.state.transition(self.expected, self.target, self.name, self.event)
+        return py_trees.common.Status.SUCCESS if changed else py_trees.common.Status.FAILURE
+
+
+class AdvancePatrol(py_trees.behaviour.Behaviour):
+    def __init__(self, context, name="Następny punkt patrolu"):
+        super().__init__(name)
+        self.context = context
+
+    def update(self):
+        self.context.patrol_waypoint_index = (self.context.patrol_waypoint_index + 1) % len(self.context.waypoints)
+        if self.context.patrol_waypoint_index == 0:
+            self.context.state.add_patrol_cycle()
+        return py_trees.common.Status.SUCCESS
+
+
+def navigation_with_recovery(context, action_type, name):
+    """Visible, bounded policy: attempt OR (clear costmaps THEN one retry)."""
+    retry = py_trees.composites.Sequence(name=f"{name}: odzyskiwanie", memory=True)
+    retry.add_children([ClearCostmaps(context), action_type(context, name=f"{name}: próba 2")])
+    recovery = py_trees.composites.Selector(name=f"{name}: jedna ponowna próba", memory=True)
+    recovery.add_children([action_type(context, name=f"{name}: próba 1"), retry])
+    return recovery
 
 
 def make_tree(context: DemoContext) -> py_trees.trees.BehaviourTree:
+    if not context.waypoints:
+        raise ValueError("Patrol requires at least one waypoint")
     root = py_trees.composites.Selector(name="Castle Demo", memory=False)
 
     stopped = py_trees.composites.Sequence(name="STOPPED?", memory=False)
-    stopped.add_children(
-        [ModeIs(context, "tryb STOPPED?", DemoMode.STOPPED), CancelNavigation(context)]
-    )
+    stopped.add_children([ModeIs(context, "tryb STOPPED?", DemoMode.STOPPED), CancelNavigation(context)])
 
+    goal_work = py_trees.composites.Sequence(name="Wykonaj żądanie celu", memory=True)
+    goal_work.add_children([
+        navigation_with_recovery(context, NavigateToGoal, "Cel"),
+        ChangeMode(context, DemoMode.GOAL, DemoMode.PATROL,
+                   "Cel osiągnięty; wracam do patrolu", "goal_cleared_to_patrol"),
+    ])
+    goal_result = py_trees.composites.Selector(name="Cel lub bezpieczny stop", memory=True)
+    goal_result.add_children([
+        goal_work,
+        ChangeMode(context, DemoMode.GOAL, DemoMode.STOPPED,
+                   "Cel nieudany po dwóch próbach; stop", "goal_failed"),
+    ])
     goal = py_trees.composites.Sequence(name="GOAL?", memory=False)
-    goal.add_children([ModeIs(context, "tryb GOAL?", DemoMode.GOAL), NavigateToGoal(context)])
+    goal.add_children([ModeIs(context, "tryb GOAL?", DemoMode.GOAL), goal_result])
 
+    waypoint = py_trees.composites.Sequence(name="Jeden punkt patrolu", memory=True)
+    waypoint.add_children([navigation_with_recovery(context, PatrolCastle, "Patrol"), AdvancePatrol(context)])
+    patrol_result = py_trees.composites.Selector(name="Patrol lub bezpieczny stop", memory=True)
+    patrol_result.add_children([
+        py_trees.decorators.SuccessIsRunning(name="Powtarzaj punkty patrolu", child=waypoint),
+        ChangeMode(context, DemoMode.PATROL, DemoMode.STOPPED,
+                   "Patrol nieudany po dwóch próbach; stop", "patrol_failed"),
+    ])
     patrol = py_trees.composites.Sequence(name="PATROL fallback", memory=False)
-    patrol.add_children([ModeIs(context, "tryb PATROL?", DemoMode.PATROL), PatrolCastle(context)])
-
+    patrol.add_children([ModeIs(context, "tryb PATROL?", DemoMode.PATROL), patrol_result])
     root.add_children([stopped, goal, patrol])
     return py_trees.trees.BehaviourTree(root)
 
@@ -378,7 +609,10 @@ class TreeRunner:
     def stop(self, cancel=None):
         self.running = False
         if self.thread is not None:
-            self.thread.join(timeout=2.0)
+            self.thread.join(timeout=20.0)
+        if self.thread is not None and self.thread.is_alive():
+            raise RuntimeError("Tree tick is still active; wait before destroying ROS nodes")
+        self.tree.root.stop(py_trees.common.Status.INVALID)
         if cancel is not None:
             cancel()
         print("Wątek drzewa zatrzymany")
@@ -514,10 +748,16 @@ def setup_navigation(
 
     demo_node = DemoNode()
     if helper_services is not None:
-        helper_services.set_controller_frequency(demo_node)
-        helper_services.publish_initial_pose(demo_node)
+        try:
+            configure_controller_frequency(demo_node)
+            helper_services.publish_initial_pose(demo_node)
+        except Exception:
+            demo_node.destroy_node()
+            raise
 
-    navigator = BasicNavigator()
+    navigator = WorkshopNavigator()
+    # Goals and initial poses must use the same clock as Gazebo and Nav2.
+    navigator.set_parameters([Parameter("use_sim_time", value=True)])
     initial_pose = PoseStamped()
     initial_pose.header.frame_id = "map"
     initial_pose.header.stamp = navigator.get_clock().now().to_msg()
@@ -525,8 +765,13 @@ def setup_navigation(
     initial_pose.pose.position.y = 0.0
     initial_pose.pose.orientation.w = 1.0
     navigator.setInitialPose(initial_pose)
-    navigator.waitUntilNav2Active()
-    navigator.clearAllCostmaps()
+    try:
+        navigator.waitUntilNav2Active()
+        navigator.clearAllCostmaps()
+    except Exception:
+        navigator.destroy_node()
+        demo_node.destroy_node()
+        raise
 
     context = DemoContext(
         node=demo_node,
@@ -582,18 +827,21 @@ def run_auto_test(args) -> int:
 
             if goal_requested and fallback_seen and not stop_requested and elapsed >= args.stop_after:
                 print(context.request_stop())
-                stop_requested = True
+                tree.tick()  # Consume the intent through the STOP branch before ending.
+                stop_requested = context.navigation_owner is None
                 break
 
             time.sleep(args.period)
     finally:
-        context.navigator.cancelTask()
+        tree.root.stop(py_trees.common.Status.INVALID)
+        context.shutdown()
         context.publish_stop(repeats=10)
         time.sleep(0.5)
         monitor_running = False
         monitor_thread.join(timeout=2.0)
         monitor_executor.remove_node(monitor)
         monitor_executor.shutdown()
+        context.navigator.destroy_node()
         demo_node.destroy_node()
         monitor.destroy_node()
         rclpy.try_shutdown()
@@ -612,7 +860,7 @@ def run_auto_test(args) -> int:
 
     moving = summary["motion"]["path_length_m"] >= args.min_path
     commanded = summary["motion"]["nonzero_cmd_samples"] >= args.min_cmd_samples
-    if fallback_seen and moving and commanded:
+    if fallback_seen and stop_requested and moving and commanded:
         return 0
     return 2
 

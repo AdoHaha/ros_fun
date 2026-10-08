@@ -41,6 +41,14 @@ From there open [*exercises folder*](http://localhost:8888/exercises/1.%20introd
 
 The demo uses ROS 2 Jazzy on Ubuntu 24.04.
 
+## Behavior tree lab
+
+Behavior tree exercises start with `exercises/9. Behavior Trees.ipynb`: a small
+deterministic demo and tasks about reactivity, memory and parallel work.
+Exercise 10 connects the solved tree to the mock ROS robot; exercise 11 uses
+the existing castle world with Nav2. Executable instructor solutions and
+verification commands are in [the solutions guide](jupyter_notebooks/exercises/.solutions/README.md).
+
 ## Autonomous planning lab
 
 The [Robo-restaurant starter](jupyter_notebooks/robo_restaurant/README.md)
