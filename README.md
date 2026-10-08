@@ -44,8 +44,8 @@ The demo uses ROS 2 Jazzy on Ubuntu 24.04.
 ## Autonomous planning lab
 
 The [Robo-restaurant starter](jupyter_notebooks/robo_restaurant/README.md)
-includes a Gazebo restaurant world, three symbolic planning demos and student
-exercises on resources, device failures and replanning. The demos run without
+starts with numbered notebooks **12–14 in `exercises/`** and includes a Gazebo
+restaurant world and demos on resources, device failures and replanning. The demos run without
 ROS; connecting the planner to a navigating waiter is a later milestone.
 
 ## Maintainer image build

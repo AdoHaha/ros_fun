@@ -3,6 +3,7 @@ from pathlib import Path
 import nbformat as nbf
 
 ROOT = Path(__file__).resolve().parents[1]
+STUDENT_NAMES = {'01_normal_service': '12. Robo Restaurant - Normal Service', '02_low_battery': '13. Robo Restaurant - Low Battery', '03_cooker_failure': '14. Robo Restaurant - Cooker Failure'}
 BOOT = '''from pathlib import Path
 import sys
 # Works from the student folder, solutions folder, or notebook server root.
@@ -32,7 +33,7 @@ def write(name, title, intro, demo, task, signature, checks, answer, explanation
         nbf.v4.new_markdown_cell('## Discussion\n\n'+explanation)]
     metadata={'kernelspec': {'display_name':'Python 3','language':'python','name':'python3'},
               'language_info':{'name':'python'}}
-    nbf.write(nbf.v4.new_notebook(cells=cells,metadata=metadata), ROOT / f'{name}.ipynb')
+    nbf.write(nbf.v4.new_notebook(cells=cells,metadata=metadata), ROOT.parent / 'exercises' / f'{STUDENT_NAMES[name]}.ipynb')
     cells[4]=nbf.v4.new_markdown_cell('## Reference solution\n\n'+task)
     cells[5]=nbf.v4.new_code_cell(answer)
     cells[6]=nbf.v4.new_markdown_cell('## Verification')

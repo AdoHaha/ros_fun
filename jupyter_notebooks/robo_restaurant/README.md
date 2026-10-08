@@ -28,17 +28,15 @@ state publisher yet. This milestone tests task effects before adding driving.
 
 ## Student notebooks and separate instructor solutions
 
-Open these notebooks in order:
+Open the `exercises/` folder in Jupyter and continue with notebooks 12–14:
 
-1. [Normal service](01_normal_service.ipynb): audit a plan and reject illegal actions.
-2. [Low battery](02_low_battery.ipynb): report charging requirements and infeasibility.
-3. [Cooker failure](03_cooker_failure.ipynb): recover from an observed failure.
+1. [Normal service](<../exercises/12. Robo Restaurant - Normal Service.ipynb>): audit a plan and reject illegal actions.
+2. [Low battery](<../exercises/13. Robo Restaurant - Low Battery.ipynb>): report charging requirements and infeasibility.
+3. [Cooker failure](<../exercises/14. Robo Restaurant - Cooker Failure.ipynb>): recover from an observed failure.
 
 Each notebook contains a runnable demonstration, a TODO function and checks.
 Unfinished answers print TODO; they are not counted as passed exercises.
-Instructor answers and solution notebooks are kept in `solutions/`. No solution
-branch has been created yet. For student distribution, exclude that directory
-and instructor verification tools/tests; the student notebooks do not import it.
+Instructor answers and solution notebooks are kept in `solutions/`. This instructor checkout includes the answers and verification tools.
 
 To run solution notebooks against a visible world, open the world with the
 command above, then set this in the solution notebook before the Gazebo cell:
