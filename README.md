@@ -2,7 +2,7 @@
 
 Robotics is fun and ROS 2 is a must.
 
-In this workshop, we will play around with ROS 2 and Simulating some robots
+In this workshop, we will explore ROS 2 by playing with simulated robots.
 
 You need to have Docker and docker compose installed.
 It can be docker engine:

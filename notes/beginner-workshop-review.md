@@ -61,6 +61,16 @@ QoS queue depth is distinguished from publish frequency. Volatile topics do not
 replay history to a late subscriber. Service responses are distinct from application
 success; timeout does not undo an operation already performed by the server.
 
+## Language review
+
+The final Polish copy pass covered instructions, hints, reflections, code comments
+and game feedback in exercises 1–5. It corrected grammar and punctuation, removed
+awkward English/Polish combinations, introduced “węzeł (node)” consistently, and
+clarified angular velocity, kernel restart, callback registration and simulator
+reuse. It also checked that each instruction describes the implemented behavior.
+Only explanatory text and feedback changed during this pass; ROS interface names,
+message fields, task logic and advanced exercises retain their existing behavior.
+
 ## Maintainer verification
 
 Inside the workshop container (the source directory is bind-mounted):

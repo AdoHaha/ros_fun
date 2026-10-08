@@ -86,12 +86,12 @@ class IntroLab:
         deadline = time.monotonic() + timeout
         while not predicate():
             if time.monotonic() >= deadline:
-                raise TimeoutError(f"Brak: {description}. Sprawdź uruchomiony symulator i nazwy topiców.")
+                raise TimeoutError(f"Brak: {description}. Sprawdź, czy symulator działa i czy nazwy interfejsów są poprawne.")
             self.spin_for(0.05)
 
     def wait_for_subscriber(self, publisher, timeout=5.0):
         self.wait_for(lambda: publisher.get_subscription_count() > 0,
-                      timeout, f"subscriber topicu {publisher.topic_name}")
+                      timeout, f"odbiorca topicu {publisher.topic_name}")
 
     def call(self, service_type, name, request, timeout=5.0):
         """Wait for discovery AND reply with a single wall-time deadline."""
@@ -100,7 +100,7 @@ class IntroLab:
         future = None
         try:
             if not client.wait_for_service(timeout_sec=timeout):
-                raise TimeoutError(f"Brak serwisu {name}. Uruchom właściwy symulator/server.")
+                raise TimeoutError(f"Brak serwisu {name}. Uruchom odpowiedni symulator lub serwer.")
             future = client.call_async(request)
             self.wait_for(future.done, max(0, deadline - time.monotonic()), f"odpowiedź {name}")
             return future.result()  # propagate transport/callback errors
@@ -115,7 +115,7 @@ class IntroLab:
         client = self.node.create_client(TeleportAbsolute, '/turtle1/teleport_absolute')
         try:
             if client.wait_for_service(timeout_sec=1.0):
-                print('Używam uruchomionego turtlesim. Wyłącz inne sterowanie żółwiem.')
+                print('Używam uruchomionego turtlesim. Zatrzymaj pozostałe programy sterujące żółwiem.')
                 return
         finally:
             self.node.destroy_client(client)
