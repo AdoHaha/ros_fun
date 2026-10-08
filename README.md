@@ -41,6 +41,19 @@ From there open [*exercises folder*](http://localhost:8888/exercises/1.%20introd
 
 The demo uses ROS 2 Jazzy on Ubuntu 24.04.
 
+## Beginner workshop: exercises 1–5
+
+The Polish notebooks start with a robot courier game in **turtlesim**: drive and
+sketch, send radio messages, build a control panel, collect position-based points,
+and implement a service that confirms a delivery. Each mission includes explanations,
+small challenges, expected results, hints and cleanup. TurtleBot/Gazebo and laser
+activities are optional extensions so slow simulation does not block the core workshop.
+
+Start with [exercise 1](jupyter_notebooks/exercises/1.%20introduction.ipynb).
+The [review and teaching guide](notes/beginner-workshop-review.md) describes the
+changes, suggested pacing and verification commands. Exercises 9–14 are the separate
+advanced behavior-tree and planning course.
+
 ## Behavior tree lab
 
 Behavior tree exercises start with `exercises/9. Behavior Trees.ipynb`: a small

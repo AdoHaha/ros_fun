@@ -60,3 +60,21 @@ and cancellation advice that could command movement without an active request.
 The replacement tasks check transitions across ticks, action ownership and cleanup,
 finite completion, limited recovery and input handling. Merely printing a tree is
 insufficient to pass those checks.
+
+## Beginner exercises 1–5
+
+`intro_answers.json` contains replacements for the four marked task cells: numbered
+messages, square velocities, checkpoint distance and delivery eligibility. The
+student notebooks stay runnable with unfinished tasks and explain what to change.
+Generate and execute solved copies inside the sourced workshop container:
+
+```bash
+cd /home/ubuntu/turtlebot3_ws/src/jupyter_notebooks/exercises
+python3 verify_intro_notebooks.py --solutions --repeat 2
+```
+
+The runner writes solved notebooks to `/tmp/intro-notebook-verification`, constructs
+and clicks the real control buttons, validates checkpoint scoring, and checks a
+real drive followed by successful and duplicate-refused delivery requests. See
+[the beginner teaching guide](../../../notes/beginner-workshop-review.md) for pacing
+and review findings.

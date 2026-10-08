@@ -2,6 +2,37 @@
 
 Notes for future work in this repository and its Docker ROS/Jupyter environment.
 
+## Beginner workshop review (2026-10-08)
+
+- Exercises 1–5 now follow a courier story: sketching and graph discovery, radio
+  messages and timed publication, position-based checkpoint scoring, then a
+  delivery service. Student-facing explanations remain Polish; advanced notebooks
+  are unchanged. See [the review and teaching guide](notes/beginner-workshop-review.md).
+- Use turtlesim for the beginner path to avoid making slow Gazebo startup a
+  prerequisite. TurtleBot/Gazebo/camera and LaserScan remain optional extensions.
+- Keep typed publishers, subscriptions, timer callbacks, client/future handling
+  and the service callback visible. Move repeat-run housekeeping into a helper;
+  label the setup cell as ready to run.
+- Finite spinning makes callback behavior observable without blocking the kernel
+  indefinitely or creating multiple background executor threads. Distinguish a
+  message being published from the robot receiving or acting on it.
+- Remove ipywidget click handlers with `on_click(..., remove=True)`;
+  `unobserve_all()` does not remove those handlers.
+- Sensor queues need compatible QoS. LaserScan geometry comes from the message's
+  actual angles and limits; invalid-only forward readings mean unknown space.
+- A discovered service may never reply. Bound discovery and response waiting,
+  remove pending requests on timeout, and explain that timeout does not undo the
+  server's operation. A negative Trigger response can be valid game feedback.
+- Verification uses real ROS and turtlesim in a separate ROS domain, triggers the
+  actual button handlers, measures movement and stopping, checks one score per
+  checkpoint, and confirms false → true → duplicate-refused delivery responses.
+  Student notebooks run with unfinished tasks; instructor answers are injected
+  only into generated solved copies. Full solved runs also repeat in one kernel.
+- The exercise regression suite passed 79 tests, including 10 new sensor/lifecycle
+  regressions. Fresh-kernel notebook runs and local HTML previews were checked.
+  Manual teleop/pair play and optional Gazebo extensions still require classroom
+  testing; automated execution does not measure whether students enjoy the games.
+
 ## Behavior tree workshop verification (2026-10-08)
 
 - Exercises 9–11 now teach decisions across ticks: reactive guards, workflow
