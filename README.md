@@ -13,13 +13,13 @@ but for beginners, an easier option might be Docker Desktop: [Windows](https://d
 
 
 
-https://github.com/AdoHaha/ros_fun/assets/2242877/33d32bce-2f59-4905-88df-bea3bd0eb838
+![Workshop setup: clone master, start Docker Compose, and open the desktop and notebooks](docs/images/workshop-setup.gif)
 
 
  I suggest cloning this repository (you need to install [git first](https://github.com/git-guides/install-git)).
 
 
-`git clone https://github.com/AdoHaha/ros_fun`
+`git clone --branch master https://github.com/AdoHaha/ros_fun.git`
 
 `cd ros_fun`
 
