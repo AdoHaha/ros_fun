@@ -55,9 +55,10 @@ publisher, asynchronous device operation or scikit-decide adapter yet. Those
 require a subsequent integration milestone; these tests make no claim about
 collision-free driving or sensor-based execution.
 
-Instructor code and solution notebooks are separate in `solutions/`. They have
-not yet been moved to an `ag2` branch. Student distribution should omit that
-folder and the instructor-only verification tools/tests.
+This `ag2` instructor branch retains `solutions/` and the full verification
+tools/tests. Student `master` omits those files and lists the notebooks as
+exercises 12–14. The earlier local commit contains answers in Git history;
+branch separation controls normal browsing, not historical access.
 
 ## Reproduce
 
