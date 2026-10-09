@@ -37,9 +37,30 @@ access the jupyter notebooks by navigating to:
 
 on your **host** machine. 
 
-From there open [*exercises folder*](http://localhost:8888/exercises/1.%20introduction.ipynb) to access introduction
+Open [exercise 1](http://localhost:8888/notebooks/exercises/1.%20introduction.ipynb)
+in Jupyter to start the workshop.
 
 The demo uses ROS 2 Jazzy on Ubuntu 24.04.
+
+## Updating an existing workshop installation
+
+Save your work in Jupyter and back up edited notebooks before updating the
+repository. Finish any running robot commands, then run these commands in the
+repository folder on your computer:
+
+```bash
+git pull --ff-only
+docker compose pull ros2
+docker compose up -d ros2
+```
+
+The image repair fixes NumPy compatibility with the plotting and camera tools.
+With the previous Hub image cached, the added download is about 22 MB on
+Intel/AMD or 18 MB on ARM. Older cached releases may also need earlier base
+updates. Pulling does not
+update a running container; `up -d` recreates it when its image changes. Your
+notebooks are stored in the repository's mounted folder and persist across
+container recreation.
 
 ## Beginner workshop: exercises 1–5
 
