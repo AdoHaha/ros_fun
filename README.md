@@ -37,9 +37,30 @@ access the jupyter notebooks by navigating to:
 
 on your **host** machine. 
 
-From there open [*exercises folder*](http://localhost:8888/exercises/1.%20introduction.ipynb) to access introduction
+Open [exercise 1](http://localhost:8888/notebooks/exercises/1.%20introduction.ipynb)
+in Jupyter to start the workshop.
 
 The demo uses ROS 2 Jazzy on Ubuntu 24.04.
+
+## Updating an existing workshop installation
+
+Save your work in Jupyter and back up edited notebooks before updating the
+repository. Finish any running robot commands, then run these commands in the
+repository folder on your computer:
+
+```bash
+git pull --ff-only
+docker compose pull ros2
+docker compose up -d ros2
+```
+
+The image repair fixes NumPy compatibility with the plotting and camera tools.
+With the previous Hub image cached, the added download is about 22 MB on
+Intel/AMD or 18 MB on ARM. Older cached releases may also need earlier base
+updates. Pulling does not
+update a running container; `up -d` recreates it when its image changes. Your
+notebooks are stored in the repository's mounted folder and persist across
+container recreation.
 
 ## Beginner workshop: exercises 1–5
 
@@ -84,15 +105,46 @@ ROS. Optional **exercise 15** adds a controlled executor with running, success,
 failure and cancellation outcomes. Connecting it to a navigating waiter remains
 a later milestone.
 
-## Maintainer image build
+## Maintainer image repair
 
-The workshop compose file expects a prebuilt Docker Hub image so participants do
-not compile or install ROS packages locally. To publish a refreshed image, use:
+`Dockerfile_patch` adds the NumPy 1.26.4 compatibility repair on the pinned pre-repair
+Docker Hub image, reusing its existing base layers. It runs no APT upgrade and
+copies no lesson files; Compose supplies lessons from the repository bind mount.
+The regular Dockerfiles remain available for a deliberate full rebuild.
+The legacy `make release` target performs a full, single-platform build; use the
+per-platform repair workflow below to preserve both architectures.
 
-`make release`
+The tested multiarch repair is published as `adohaha/fun_ros:jazzy` and
+`adohaha/fun_ros:jazzy-edu-20261009`. The previous image is retained as
+`adohaha/fun_ros:jazzy-before-edu-20261009` for rollback. Release digests and
+validation results are recorded in [LESSONS_LEARNED.md](LESSONS_LEARNED.md).
 
-By default this builds and pushes `adohaha/fun_ros:jazzy`. Override the tag with
-`make release IMAGE=adohaha/fun_ros:<tag>`.
+Build each supported platform using a native builder or configured ARM emulation:
+
+```bash
+docker buildx build --platform linux/amd64 --load -f Dockerfile_patch -t adohaha/fun_ros:jazzy-edu-20261009-amd64 .
+docker buildx build --platform linux/arm64 --load -f Dockerfile_patch -t adohaha/fun_ros:jazzy-edu-20261009-arm64 .
+```
+
+Before publication, source ROS and run `tools/verify_image_patch.py` as ubuntu in
+each candidate. It checks imports, a rendered Matplotlib figure, OpenCV array
+processing and the actual rqt Plot plugin. For example:
+
+```bash
+docker run --rm --user ubuntu --entrypoint bash \
+  -v "$PWD/tools/verify_image_patch.py:/tmp/verify_image_patch.py:ro" \
+  adohaha/fun_ros:jazzy-edu-20261009-amd64 \
+  -lc 'source /opt/ros/jazzy/setup.bash && python3 /tmp/verify_image_patch.py'
+```
+
+Use the arm64 candidate with `--platform linux/arm64` to verify that platform.
+Also verify a fresh classroom container's
+VNC/Jupyter endpoints and core solved notebooks. Keep both amd64 and arm64 in the
+published index, then promote the tested versioned index to `jazzy`.
+
+For students already caching the previous Hub image, only the repair layer is new.
+Older cached releases can also need base layers that changed before this repair.
+See the student update instructions above for pulling and recreating the container.
 
 ---
 

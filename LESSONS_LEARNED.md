@@ -2,6 +2,91 @@
 
 Notes for future work in this repository and its Docker ROS/Jupyter environment.
 
+
+## Scope audit and branch correction (2026-10-09)
+
+An independent agent reviewed every path in `4698aac..3222abd` after the complete
+branch was mistakenly pushed as educational materials. The 53 changed files were:
+
+| Category | Count | Contents |
+| --- | ---: | --- |
+| Student and instructor materials | 22 | Notebooks 1–15, two reference notebooks, five answer JSON files |
+| Required lesson runtime | 6 | IntroLab, action/parameter/navigation helpers, tree navigation fix, symbolic executor |
+| Verification infrastructure | 18 | New tests, notebook/CLI/Gazebo runners, motion probes, changes to existing verification files |
+| Docker environment | 2 | NumPy compatibility changes in both image recipes |
+| Mixed documentation | 5 | Course overview, instructor guides, review and maintainer history |
+
+`master` was corrected in `c5eeeec` with a normal follow-up commit; its history was not
+rewritten. It keeps the lessons, instructor answers and required runtime helpers.
+The complete tests, runners and image work remain on `dev`. Master's Docker
+recipes match the pre-merge baseline. Teaching documentation links to this branch
+for additional automation instead of advertising commands absent from master.
+
+The agent found two compatibility details: notebook 11 already imports its fake
+navigator from the existing `test_nav_bt.py`, so that file remains on master with
+its existing startup assertion adjusted for the runtime fix. Its new publication
+regression stays here. The obsolete `test_bt_notebook_helpers.py` remains removed
+because it extracts a shell helper that the revised notebook no longer contains.
+Restoring that test blindly would produce StopIteration. No new automated test
+files remain in the corrected educational update.
+
+Validation of the corrected material tree passed all 19 notebook syntax/schema
+checks, eight answer-task mappings and documentation links. The existing suite
+passed 66 tests, and all six behavior-tree student/reference notebooks passed
+kernel execution, including real ROS actions and cancellation. The full dev
+snapshot had already passed 138 regressions and the recorded live navigation,
+turtlesim and planning verification.
+
+The image compatibility change is specifically NumPy 1.26.4 plus import checks
+for Matplotlib/OpenCV. It does not change ROS, base distribution, ports, volumes
+or the simulation. Compose pulls the prebuilt Docker Hub image: recipe changes
+alone do not update students' existing images or containers. Release work uses a
+pinned pre-repair Docker Hub base and one compatibility layer, preserving the base
+layers students already downloaded and both amd64/arm64 entries. Save notebooks
+before an explicit pull and container recreation; bind-mounted course files persist.
+
+## Cache-preserving image release (2026-10-09)
+
+The pristine published image contained NumPy 2.4.6. Matplotlib and OpenCV failed
+to import because their extensions used the NumPy 1.x ABI; bqplot also failed
+through pandas. `Dockerfile_patch` pins only NumPy 1.26.4, without dependency
+upgrades, APT changes or copied course files. The existing runtime configuration
+is preserved, including the entrypoint, environment, ports and volumes.
+
+Both platform manifests retain all 28 compressed base-layer digests and sizes
+exactly, with one repair layer added. This minimizes downloads for students who
+cached the previous published base; older images can still need earlier layers.
+
+| Platform | Added compressed bytes | Validation |
+| --- | ---: | --- |
+| linux/amd64 | 21,599,859 | Numeric/Qt/ROS checks plus fresh classroom container |
+| linux/arm64 | 17,804,152 | Numeric/Qt/ROS checks under QEMU emulation |
+
+Both candidates passed NumPy/Matplotlib/OpenCV/bqplot/tornado imports, PNG
+rendering, OpenCV array processing and the real rqt Plot plugin using its
+Matplotlib Qt backend. ROS contexts and nodes were created and destroyed.
+The fresh AMD64 classroom container additionally passed VNC/Jupyter endpoints,
+a real Jupyter WebSocket kernel, turtlesim movement/stopping, solved
+exercises 1–5, exercise 7 starter/solution and exercise 8 solution. Native ARM
+and fresh-image Gazebo were not tested. Earlier live Gazebo/Nav2 validation
+belongs to the full dev snapshot described above.
+
+Published tags `adohaha/fun_ros:jazzy-edu-20261009` and `adohaha/fun_ros:jazzy`
+resolve to the same two-platform index:
+`sha256:5211658bfbd3994453bdd61ba5f6fd24e1d9bf71389cd313744b2e0f85c61c85`.
+The verified children are:
+
+- AMD64: `sha256:399f1b24c012290ec7f75fec615e638927ed3a59cbcb9d53a1b877d10b26dd32`
+- ARM64: `sha256:1dfb2bfb0f8b35f05467d487a75bef2ec93989e75df366d16eebb7f3387b0ec9`
+
+Rollback tag `adohaha/fun_ros:jazzy-before-edu-20261009` retains the original
+index `sha256:334aed757329e4d46f899e8aa3ee0e200094699d6253045de2712a28173c7a16`.
+Stable was checked for concurrent changes before promotion. The existing local
+`ros_fun` container was not recreated during release validation or publication.
+The README's direct exercise-one link was also corrected: the old path returned
+HTTP 404, while `/notebooks/exercises/1.%20introduction.ipynb` returned HTTP 200
+from the workshop Jupyter server.
+
 ## Course connections and continuation (2026-10-09)
 
 - Exercises 6–8 continue the courier story. Six is an optional real Nav2 route;

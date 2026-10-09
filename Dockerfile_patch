@@ -1,0 +1,7 @@
+# Incremental compatibility repair: preserve the existing workshop base layers.
+ARG BASE_IMAGE=adohaha/fun_ros@sha256:334aed757329e4d46f899e8aa3ee0e200094699d6253045de2712a28173c7a16
+FROM ${BASE_IMAGE}
+
+USER root
+RUN python3 -m pip install --break-system-packages --no-cache-dir --only-binary=:all: --no-deps 'numpy==1.26.4' && \
+    python3 -c "import numpy, matplotlib.pyplot, cv2; assert numpy.__version__ == '1.26.4'"
