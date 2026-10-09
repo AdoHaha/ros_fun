@@ -51,15 +51,28 @@ activities are optional extensions so slow simulation does not block the core wo
 
 Start with [exercise 1](jupyter_notebooks/exercises/1.%20introduction.ipynb).
 The [review and teaching guide](notes/beginner-workshop-review.md) describes the
-changes, suggested pacing and verification commands. Exercises 9–14 are the separate
-advanced behavior-tree and planning course.
+changes, suggested pacing and verification commands.
+
+## From driving to autonomous decisions
+
+The student descriptions in exercises 1–15 are Polish. Exercises **6–8** continue
+the courier story: an optional Nav2 delivery route, a standalone turtlesim compass
+challenge using actions, and configurable delivery rules using parameters. Nav2
+is optional; exercises 7–8 do not require Gazebo or exercise 6's setup.
+
+Exercises **9–15** belong to the separate advanced course and include a short
+ROS recap. The connections are explicit: subscribers supply observations,
+parameters configure rules, and actions remain running until their result arrives.
+Behavior trees choose priorities and handle interruption; planners select an
+action sequence from the observed state. The final optional bridge practices
+execution, bounded retry and replanning before adding a restaurant ROS adapter.
 
 ## Behavior tree lab
 
 Behavior tree exercises start with `exercises/9. Behavior Trees.ipynb`: a small
 deterministic demo and tasks about reactivity, memory and parallel work.
 Exercise 10 connects the solved tree to the mock ROS robot; exercise 11 uses
-the existing castle world with Nav2. Executable instructor solutions and
+the TurtleBot world in Gazebo with Nav2. Executable instructor solutions and
 verification commands are in [the solutions guide](jupyter_notebooks/exercises/.solutions/README.md).
 
 ## Autonomous planning lab
@@ -67,7 +80,9 @@ verification commands are in [the solutions guide](jupyter_notebooks/exercises/.
 The [Robo-restaurant starter](jupyter_notebooks/robo_restaurant/README.md)
 starts with numbered notebooks **12–14 in `exercises/`** and includes a Gazebo
 restaurant world and demos on resources, device failures and replanning. The demos run without
-ROS; connecting the planner to a navigating waiter is a later milestone.
+ROS. Optional **exercise 15** adds a controlled executor with running, success,
+failure and cancellation outcomes. Connecting it to a navigating waiter remains
+a later milestone.
 
 ## Maintainer image build
 

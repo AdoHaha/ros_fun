@@ -267,9 +267,17 @@ class WorkshopNavigator(BasicNavigator):
                            "Run the simulation restart cell, then retry navigation setup.")
 
     def _wait_for_initial_pose(self, deadline):
-        while not self.initial_pose_received and time.monotonic() < deadline:
-            self._setInitialPose()
-            rclpy.spin_once(self, timeout_sec=min(1.0, max(0.0, deadline - time.monotonic())))
+        # Other subscriptions can make spin_once return immediately. Publishing
+        # on every callback floods AMCL with resets and the notebook with logs.
+        next_publish = -math.inf
+        while not self.initial_pose_received:
+            now = time.monotonic()
+            if now >= deadline:
+                break
+            if now >= next_publish:
+                self._setInitialPose()
+                next_publish = now + 0.5
+            rclpy.spin_once(self, timeout_sec=min(0.1, deadline - now))
         if not self.initial_pose_received:
             raise TimeoutError("Nav2 startup timed out waiting for AMCL pose. "
                                "Check the simulation clock and restart navigation from its notebook cell.")

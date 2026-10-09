@@ -1,0 +1,3 @@
+{
+  "compass_headings": "def kat_dla(kierunek):\n    return {'polnoc': math.pi / 2, 'zachod': math.pi,\n            'poludnie': -math.pi / 2, 'wschod': 0.0}[kierunek]\n\ntrasa = ['polnoc', 'zachod', 'poludnie', 'wschod']\nkaty = [kat_dla(kierunek) for kierunek in trasa]\noczekiwane = [math.pi / 2, math.pi, -math.pi / 2, 0.0]\nkompas_gotowy = all(isinstance(kat, (int, float)) and math.isfinite(kat)\n                    and math.isclose(kat, cel, abs_tol=0.001)\n                    for kat, cel in zip(katy, oczekiwane))\nprint('✓ Kompas działa!' if kompas_gotowy else f'Uzupełnij kierunki: {katy}')"
+}

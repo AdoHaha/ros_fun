@@ -2,6 +2,55 @@
 
 Notes for future work in this repository and its Docker ROS/Jupyter environment.
 
+## Course connections and continuation (2026-10-09)
+
+- Exercises 6–8 continue the courier story. Six is an optional real Nav2 route;
+  seven teaches the action lifecycle with standalone turtlesim; eight validates
+  parameters and demonstrates their effect on actual speed and arrival rules.
+  Neither seven nor eight depends on a running navigation world.
+- The advanced course retains its tree and planning tasks. Entry explanations
+  connect observations, configuration, running actions and cancellation to tree
+  priorities, then distinguish Nav2 route planning from symbolic task planning.
+  Planning notebooks 12–14 now have Polish descriptions consistent with the rest.
+- Optional exercise 15 supplies a controlled, headless execution bridge. Effects
+  apply only on terminal success; failure, cancellation and changed observations
+  cannot silently commit the old action. One still-legal local retry is separate
+  from replanning. This is preparation for a restaurant ROS adapter, not one.
+- Navigation goals need finite coordinates, simulation timestamps and unit yaw
+  quaternions. Goal acceptance and cancel acknowledgement are not terminal results.
+  Startup and result waits have wall deadlines and useful log paths.
+- Publish the initial AMCL pose at a bounded rate while continuing to process
+  callbacks. Publishing after every spin floods localisation with resets when
+  other subscriptions return immediately. A regression exercises that scenario.
+- Navigation notebooks 6 and 11 own their Gazebo/Nav2/RViz process groups and
+  refuse another running world. Cleanup stops only resources that the notebook
+  created; it continues signalling owned children if the launcher exits first.
+  The installed simulation is turtlebot3_world, despite legacy Castle code names.
+- Jazzy RotateAbsolute returns delta toward the starting heading: a positive
+  quarter turn yields approximately negative pi/2. Check actual heading and
+  terminal status rather than inferring success from the result sign.
+- Parameter callbacks validate type, finiteness and range before changing values.
+  Atomic batches reject all updates if one is invalid; ordinary batches may
+  succeed partially. Fresh CLI discovery avoids stale cached notebook nodes.
+- Nav2 arrival verification uses the current map-to-base TF transform: AMCL's
+  last published pose may be older than the final robot position. Cancellation
+  checks require a fresh stopped odometry sample and the terminal canceled result.
+- The combined exercise regression suite passed 117 tests. Live notebook eleven
+  completed patrol, goal preemption, successful arrival, resumed patrol and stop
+  with RViz, recording 1.248 m of travel and a final zero velocity command.
+- Exercise 6 passed two starter and two solved runs in the same kernel, including
+  the actual exercise-7 native Nav2 action cell on both solved runs. Its domain
+  was empty after cleanup. Final orientation can take time even when the remaining
+  distance is small; the lesson explains why the terminal result is still needed.
+- Public navigation and parameter-CLI timeouts reject nonfinite values rather
+  than allowing NaN or infinity to bypass wall deadlines.
+- The restaurant model/executor suite passed 21 tests. Student demonstrations
+  12–14 and all six student/reference tree notebooks passed kernel execution.
+  Exercise 15's student and solved copies each passed two runs in one kernel;
+  exercises 7–8 did likewise with real turtlesim, feedback, cancellation,
+  parameter validation and CLI requests.
+
+
 ## Beginner workshop review (2026-10-08)
 
 - Exercises 1–5 now follow a courier story: sketching and graph discovery, radio
@@ -177,11 +226,6 @@ source /home/ubuntu/turtlebot3_ws/install/setup.bash
 
 - Validate notebooks cell by cell inside Docker, not just with static inspection.
 - Treat background terminal commands as part of validation: if a launched background process exits nonzero immediately, the notebook cell should be considered failed.
-- Before repeated ROS launch tests, clean up stale processes with a bracketed regex so the cleanup command does not match itself:
-
-  ```bash
-  pattern='[r]os2 launch ros_fun|[p]y-trees-tree-watcher|[p]y-trees-blackboard-watcher|[t]ree-action-clients|[m]ock-battery|[m]ock-dashboard|[m]ock-led-strip|[m]ock-docking-controller|[m]ock-move-base|[m]ock-rotation-controller|[m]ock-safety-sensors'
-  pkill -TERM -f "$pattern" 2>/dev/null || true
-  sleep 1
-  pkill -KILL -f "$pattern" 2>/dev/null || true
-  ```
+- Before repeated ROS launch tests, use the notebook's cleanup cell or Ctrl+C in
+  the terminal that owns the launch. Use an isolated ROS domain for verification.
+  Avoid broad process-name cleanup that could stop another student's session.

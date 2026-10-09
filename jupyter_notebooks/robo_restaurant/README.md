@@ -28,11 +28,12 @@ state publisher yet. This milestone tests task effects before adding driving.
 
 ## Student notebooks and separate instructor solutions
 
-Open the `exercises/` folder in Jupyter and continue with notebooks 12–14:
+Open the `exercises/` folder in Jupyter and continue with the Polish notebooks 12–15:
 
 1. [Normal service](<../exercises/12. Robo Restaurant - Normal Service.ipynb>): audit a plan and reject illegal actions.
 2. [Low battery](<../exercises/13. Robo Restaurant - Low Battery.ipynb>): report charging requirements and infeasibility.
 3. [Cooker failure](<../exercises/14. Robo Restaurant - Cooker Failure.ipynb>): recover from an observed failure.
+4. [Planning and execution bridge](<../exercises/15. Planning and Execution - Bridge.ipynb>) (optional): wait for action results, retry once when still legal, and replan from changed observations.
 
 Each notebook contains a runnable demonstration, a TODO function and checks.
 Unfinished answers print TODO; they are not counted as passed exercises.
@@ -45,6 +46,8 @@ Inside the sourced Jazzy workshop container, from `jupyter_notebooks`:
 ```bash
 python3 -m unittest discover -s robo_restaurant/tests -v
 python3 robo_restaurant/tools/verify_notebooks.py --output /tmp/restaurant-notebooks
+python3 robo_restaurant/tools/verify_execution_bridge.py --repeat 2
+python3 robo_restaurant/tools/verify_execution_bridge.py --solutions --repeat 2
 ```
 
 The runner executes the three student demonstrations and confirms that unanswered
@@ -134,6 +137,12 @@ For a live ROS/Gazebo lab, add these components:
   never mark an order served merely because a plan contains `serve`.
 - Retain a headless symbolic mode for grading. Record success rate, cost,
   missed deadlines (once modelled) and replans across fixed scenarios.
+
+Exercise 15 provides the headless executor contract for this roadmap. Controlled
+outcomes remain `RUNNING` for several ticks; only terminal success commits effects.
+Failure leaves the state unchanged, new observations invalidate stale outcomes,
+and cancellation stops the workflow. Its student task chooses retry, replan or
+blocked recovery. These controlled outcomes do not drive the restaurant's robot.
 
 Keep the planner, state model and executor separate. Existing behaviour-tree
 exercises in this repository can supply the execution layer: the planner
