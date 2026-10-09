@@ -229,19 +229,6 @@ class StartupWaitTests(unittest.TestCase):
         self.assertEqual(spin.call_count, 2)
         self.assertEqual(spin.call_args.kwargs["timeout_sec"], 0.1)
 
-    def test_initial_pose_publication_is_not_driven_by_unrelated_callbacks(self):
-        nav = Mock()
-        nav.initial_pose_received = False
-        spins = []
-        def receive(**kwargs):
-            spins.append(kwargs)
-            if len(spins) == 6:
-                nav.initial_pose_received = True
-        with patch.object(trees_nav.time, 'monotonic', side_effect=[0, 0.1, 0.2, 0.49, 0.5, 0.6]), \
-             patch.object(trees_nav.rclpy, 'spin_once', side_effect=lambda node, **kw: receive(**kw)):
-            trees_nav.WorkshopNavigator._wait_for_initial_pose(nav, deadline=2)
-        self.assertEqual(nav._setInitialPose.call_count, 2)
-        self.assertEqual(len(spins), 6)
 
 
 class NavigationTreeTests(unittest.TestCase):

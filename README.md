@@ -84,15 +84,12 @@ ROS. Optional **exercise 15** adds a controlled executor with running, success,
 failure and cancellation outcomes. Connecting it to a navigating waiter remains
 a later milestone.
 
-## Maintainer image build
+## Development and image maintenance
 
-The workshop compose file expects a prebuilt Docker Hub image so participants do
-not compile or install ROS packages locally. To publish a refreshed image, use:
-
-`make release`
-
-By default this builds and pushes `adohaha/fun_ros:jazzy`. Override the tag with
-`make release IMAGE=adohaha/fun_ros:<tag>`.
+Additional regression tests, verification runners and Docker image repairs are
+maintained on the [dev branch](https://github.com/AdoHaha/ros_fun/tree/dev).
+The master branch contains the teaching materials and the helpers needed to run
+them, alongside the repository's pre-existing infrastructure.
 
 ---
 

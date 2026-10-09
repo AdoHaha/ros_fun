@@ -2,102 +2,6 @@
 
 Notes for future work in this repository and its Docker ROS/Jupyter environment.
 
-## Course connections and continuation (2026-10-09)
-
-- Exercises 6–8 continue the courier story. Six is an optional real Nav2 route;
-  seven teaches the action lifecycle with standalone turtlesim; eight validates
-  parameters and demonstrates their effect on actual speed and arrival rules.
-  Neither seven nor eight depends on a running navigation world.
-- The advanced course retains its tree and planning tasks. Entry explanations
-  connect observations, configuration, running actions and cancellation to tree
-  priorities, then distinguish Nav2 route planning from symbolic task planning.
-  Planning notebooks 12–14 now have Polish descriptions consistent with the rest.
-- Optional exercise 15 supplies a controlled, headless execution bridge. Effects
-  apply only on terminal success; failure, cancellation and changed observations
-  cannot silently commit the old action. One still-legal local retry is separate
-  from replanning. This is preparation for a restaurant ROS adapter, not one.
-- Navigation goals need finite coordinates, simulation timestamps and unit yaw
-  quaternions. Goal acceptance and cancel acknowledgement are not terminal results.
-  Startup and result waits have wall deadlines and useful log paths.
-- Publish the initial AMCL pose at a bounded rate while continuing to process
-  callbacks. Publishing after every spin floods localisation with resets when
-  other subscriptions return immediately. A regression exercises that scenario.
-- Navigation notebooks 6 and 11 own their Gazebo/Nav2/RViz process groups and
-  refuse another running world. Cleanup stops only resources that the notebook
-  created; it continues signalling owned children if the launcher exits first.
-  The installed simulation is turtlebot3_world, despite legacy Castle code names.
-- Jazzy RotateAbsolute returns delta toward the starting heading: a positive
-  quarter turn yields approximately negative pi/2. Check actual heading and
-  terminal status rather than inferring success from the result sign.
-- Parameter callbacks validate type, finiteness and range before changing values.
-  Atomic batches reject all updates if one is invalid; ordinary batches may
-  succeed partially. Fresh CLI discovery avoids stale cached notebook nodes.
-- Nav2 arrival verification uses the current map-to-base TF transform: AMCL's
-  last published pose may be older than the final robot position. Cancellation
-  checks require a fresh stopped odometry sample and the terminal canceled result.
-- The combined exercise regression suite passed 117 tests. Live notebook eleven
-  completed patrol, goal preemption, successful arrival, resumed patrol and stop
-  with RViz, recording 1.248 m of travel and a final zero velocity command.
-- Exercise 6 passed two starter and two solved runs in the same kernel, including
-  the actual exercise-7 native Nav2 action cell on both solved runs. Its domain
-  was empty after cleanup. Final orientation can take time even when the remaining
-  distance is small; the lesson explains why the terminal result is still needed.
-- Public navigation and parameter-CLI timeouts reject nonfinite values rather
-  than allowing NaN or infinity to bypass wall deadlines.
-- The restaurant model/executor suite passed 21 tests. Student demonstrations
-  12–14 and all six student/reference tree notebooks passed kernel execution.
-  Exercise 15's student and solved copies each passed two runs in one kernel;
-  exercises 7–8 did likewise with real turtlesim, feedback, cancellation,
-  parameter validation and CLI requests.
-
-
-## Beginner workshop review (2026-10-08)
-
-- Exercises 1–5 now follow a courier story: sketching and graph discovery, radio
-  messages and timed publication, position-based checkpoint scoring, then a
-  delivery service. Student-facing explanations remain Polish; advanced notebooks
-  are unchanged. See [the review and teaching guide](notes/beginner-workshop-review.md).
-- Use turtlesim for the beginner path to avoid making slow Gazebo startup a
-  prerequisite. TurtleBot/Gazebo/camera and LaserScan remain optional extensions.
-- Keep typed publishers, subscriptions, timer callbacks, client/future handling
-  and the service callback visible. Move repeat-run housekeeping into a helper;
-  label the setup cell as ready to run.
-- Finite spinning makes callback behavior observable without blocking the kernel
-  indefinitely or creating multiple background executor threads. Distinguish a
-  message being published from the robot receiving or acting on it.
-- Remove ipywidget click handlers with `on_click(..., remove=True)`;
-  `unobserve_all()` does not remove those handlers.
-- Sensor queues need compatible QoS. LaserScan geometry comes from the message's
-  actual angles and limits; invalid-only forward readings mean unknown space.
-- A discovered service may never reply. Bound discovery and response waiting,
-  remove pending requests on timeout, and explain that timeout does not undo the
-  server's operation. A negative Trigger response can be valid game feedback.
-- Verification uses real ROS and turtlesim in a separate ROS domain, triggers the
-  actual button handlers, measures movement and stopping, checks one score per
-  checkpoint, and confirms false → true → duplicate-refused delivery responses.
-  Student notebooks run with unfinished tasks; instructor answers are injected
-  only into generated solved copies. Full solved runs also repeat in one kernel.
-- The exercise regression suite passed 92 tests, including 10 sensor/lifecycle
-  and 13 task/boundary/ownership regressions. The verifier checks every control
-  button, all square corners and closure, and checkpoint collection by driving.
-- `verify_intro_cli.py` passed 24 live keyboard/CLI/radio/service checks.
-  `verify_intro_gazebo.py --gui` checked the real world, camera, laser notebook
-  cell, simulation-stamped movement, odometry and stop. RViz camera, Plot curve
-  and Node Graph were inspected on the desktop. Classroom pair networking and
-  beginner enjoyment still require testing with students.
-- Jazzy turtlesim advances a fixed 16 ms physics step per Qt timer update. Under
-  heavy Gazebo/GUI load, a one-second wall-time command can produce a smaller
-  turn than expected. Close the optional Gazebo/RViz/rqt before core turtle
-  missions; preserve this honest open-loop limitation rather than hiding pose
-  feedback inside the publisher lesson. The subscriber lesson introduces pose.
-- Allow several seconds for DDS discovery before deciding an existing turtlesim
-  is absent; one second started duplicate simulators under load. A fresh-context
-  regression checks reuse and ensures a borrower cannot close the owner's robot.
-- NumPy 2 in the prebuilt image broke Ubuntu's Matplotlib extension and rqt Plot.
-  Both Docker recipes pin NumPy 1.26.4 and check Matplotlib/OpenCV imports. The
-  running container was repaired for validation; Docker Hub still needs a new
-  image release before ordinary Compose users receive that fix.
-
 ## Behavior tree workshop verification (2026-10-08)
 
 - Exercises 9–11 now teach decisions across ticks: reactive guards, workflow
@@ -226,6 +130,11 @@ source /home/ubuntu/turtlebot3_ws/install/setup.bash
 
 - Validate notebooks cell by cell inside Docker, not just with static inspection.
 - Treat background terminal commands as part of validation: if a launched background process exits nonzero immediately, the notebook cell should be considered failed.
-- Before repeated ROS launch tests, use the notebook's cleanup cell or Ctrl+C in
-  the terminal that owns the launch. Use an isolated ROS domain for verification.
-  Avoid broad process-name cleanup that could stop another student's session.
+- Before repeated ROS launch tests, clean up stale processes with a bracketed regex so the cleanup command does not match itself:
+
+  ```bash
+  pattern='[r]os2 launch ros_fun|[p]y-trees-tree-watcher|[p]y-trees-blackboard-watcher|[t]ree-action-clients|[m]ock-battery|[m]ock-dashboard|[m]ock-led-strip|[m]ock-docking-controller|[m]ock-move-base|[m]ock-rotation-controller|[m]ock-safety-sensors'
+  pkill -TERM -f "$pattern" 2>/dev/null || true
+  sleep 1
+  pkill -KILL -f "$pattern" 2>/dev/null || true
+  ```

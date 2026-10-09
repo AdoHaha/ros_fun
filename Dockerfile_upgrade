@@ -9,8 +9,4 @@ RUN apt-get update -q && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Keep Ubuntu's Matplotlib/OpenCV extensions compatible with NumPy.
-RUN python3 -m pip install --break-system-packages --no-cache-dir 'numpy==1.26.4' && \
-    python3 -c "import numpy, matplotlib.pyplot, cv2; assert numpy.__version__ == '1.26.4'"
-
 USER ubuntu

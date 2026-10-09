@@ -67,51 +67,25 @@ insufficient to pass those checks.
 `intro_answers.json` contains replacements for the four marked task cells: numbered
 messages, square velocities, checkpoint distance and delivery eligibility. The
 student notebooks stay runnable with unfinished tasks and explain what to change.
-Generate and execute solved copies inside the sourced workshop container:
-
-```bash
-cd /home/ubuntu/turtlebot3_ws/src/jupyter_notebooks/exercises
-python3 verify_intro_notebooks.py --solutions --repeat 2
-```
-
-The runner writes solved notebooks to `/tmp/intro-notebook-verification`, constructs
-and clicks the real control buttons, validates checkpoint scoring, and checks a
-real drive followed by successful and duplicate-refused delivery requests. See
-[the beginner teaching guide](../../../notes/beginner-workshop-review.md) for pacing
-and review findings.
+The answer JSON maps each marked task to replacement cell source. To prepare an
+instructor copy, copy that source into the matching task cell and run the notebook
+in order. See [the beginner teaching guide](../../../notes/beginner-workshop-review.md)
+for pacing and review findings.
 
 ## Continuation and planning bridge
 
 Exercises 6–8 have separate JSON answers: `navigation_answers.json` uses
 `course_task`, `action_answers.json` uses `action_task`, and
-`parameters_answers.json` uses `parameters_task`. The starter notebooks run with
-unfinished tasks and report what remains to be completed. Use their verifiers
-inside the sourced container:
+`parameters_answers.json` uses `parameters_task`. Replace the corresponding
+marked cell in an instructor copy. The student starters run with unfinished tasks
+and explain what remains to be completed.
 
-```bash
-python3 verify_navigation_notebook.py --solutions --repeat 2
-python3 verify_navigation_notebook.py --solutions --action-bridge
-python3 verify_action_notebook.py --solutions --repeat 2
-python3 verify_parameters_notebook.py --solutions --repeat 2
-```
+Exercise 15's `planning_execution_answers.json` supplies the cell marked
+`planning_execution_task='recovery_policy'`. Its controlled executor teaches
+successful effects, failed-action handling, bounded retry, observed state changes,
+replanning and deliberate cancellation. It does not drive a restaurant robot.
 
-Omit `--solutions` to test the starter. These runners use separate ROS domains
-(95, 96 and 97 respectively). Run Gazebo verification sequentially and close other
-heavy GUI demonstrations before the turtle checks. Executed notebooks and reports
-go under `/tmp`. Nav2 verification checks current TF position, measured motion,
-terminal cancellation and fresh stopped odometry; acceptance alone is insufficient.
-The `--action-bridge` option also runs exercise 7's optional native Nav2 client
-against the owned world, checking its final status and current map position.
-
-Exercise 15's `planning_execution_answers.json` replaces the cell marked
-`planning_execution_task='recovery_policy'`. From `jupyter_notebooks` run:
-
-```bash
-python3 robo_restaurant/tools/verify_execution_bridge.py --repeat 2
-python3 robo_restaurant/tools/verify_execution_bridge.py --solutions --repeat 2
-```
-
-This is a headless controlled executor, not a restaurant Nav2 integration. It
-checks successful effects, failed-action rollback, bounded local retry, observed
-state changes, replanning and deliberate cancellation. Exercises 12–14 keep their
-existing planning tasks; the new Polish descriptions connect them to execution.
+The additional automated tests, solved-copy generators and image maintenance live
+on the [dev branch](https://github.com/AdoHaha/ros_fun/tree/dev). Their verification
+commands are documented in that branch's copy of this guide. The lessons and
+instructor answers on master do not require those tools.

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Execute the complete Nav2 notebook and verify motion, goal, patrol and stop.
 
-Run inside the workshop container with ROS sourced. Launches the TurtleBot world in Gazebo
- through the notebook cells; allow several minutes on a slow host.
+Run inside the workshop container with ROS sourced. Launches the existing castle
+simulation through the notebook cells; allow several minutes on a slow host.
 """
 import argparse
 import json

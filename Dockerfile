@@ -42,15 +42,10 @@ RUN apt-get update -q && \
 # packages remain on the system interpreter, and install only frontend assets
 # that the Ubuntu widget packages do not reliably expose to classic Notebook.
 RUN python3 -m pip install --break-system-packages --no-cache-dir \
-      'numpy==1.26.4' \
       RISE \
       jupyterlab_widgets==3.0.9 && \
     python3 -m pip install --break-system-packages --no-cache-dir --ignore-installed \
       widgetsnbextension==4.0.9
-
-# Ubuntu's Matplotlib/OpenCV binaries use the NumPy 1.x ABI. NumPy 2 from
-# the base image prevents rqt_plot from loading its plugin.
-RUN python3 -c "import numpy, matplotlib.pyplot, cv2; assert numpy.__version__ == '1.26.4'"
 
 RUN mkdir -p /home/ubuntu/turtlebot3_ws/src /home/ubuntu/.jupyter && \
     chown -R ubuntu:ubuntu /home/ubuntu/turtlebot3_ws /home/ubuntu/.jupyter

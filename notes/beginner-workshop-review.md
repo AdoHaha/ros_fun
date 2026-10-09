@@ -2,7 +2,7 @@
 
 The first five exercises should make students want to explore robots and let them
 explain what their code does. Behavior trees and planning belong to the separate
-advanced course. Exercises 6–14 and their runtime helpers are outside this change.
+advanced course. This guide covers exercises 1–5; the root README describes the later course connections.
 Student text remains Polish, with familiar ROS interface names in English.
 
 ## Findings and changes
@@ -20,7 +20,7 @@ Student text remains Polish, with familiar ROS interface names in English.
 | Copied spinner can start multiple unjoined, non-daemon threads | Executors race; cleanup and kernel shutdown are unreliable | No background spinner in the beginner path; one executor owned by each notebook |
 | Laser plot assumes 360 values and first reading means forward | Wrong shape or wrong obstacle direction | Optional laser uses message angles, range limits and sensor-data QoS; invalid-only cone stays unknown |
 | rqt Plot asks for a structured position object | No useful numeric plot | Use `/odom/pose/pose/position/x` |
-| NumPy 2 in the image conflicts with Ubuntu's Matplotlib binary | rqt Plot fails to open | Pin NumPy 1.26.4 in both image recipes and check Matplotlib/OpenCV imports during build |
+| NumPy 2 in the image conflicts with Ubuntu's Matplotlib binary | rqt Plot fails to open | NumPy compatibility repair is maintained with image tooling on the dev branch |
 | A fresh ROS context can take longer than one second to discover turtlesim | A second simulator starts despite an existing session | Allow five seconds for discovery and test reuse from a separate context |
 | Services only inspect another node's parameters | Little visible payoff; no server-side model | Change pen, draw a postcard, teleport, then implement a Trigger delivery server with positive, negative and duplicate responses |
 | Service call waits indefinitely for reply | Discovery success can still leave the notebook stuck | Bounded waits for both discovery and completion; clients and pending requests cleaned up |
@@ -42,8 +42,8 @@ Student text remains Polish, with familiar ROS interface names in English.
 For a short session, do the basic missions and omit every bonus. Students should
 make small edits in the notebook, not copy an entire robot package. Completed
 student starters are intentionally not prefilled. Instructor answer cells are in
-`exercises/.solutions/intro_answers.json`; the runner produces solved notebooks
-outside the checkout. The existing behavior-tree solutions remain unchanged.
+`exercises/.solutions/intro_answers.json`; copy its source into matching task cells
+in an instructor notebook. Automated generation lives on the dev branch.
 
 ## Runtime design
 
@@ -89,61 +89,12 @@ reuse. It also checked that each instruction describes the implemented behavior.
 Only explanatory text and feedback changed during this pass; ROS interface names,
 message fields, task logic and advanced exercises retain their existing behavior.
 
-## Maintainer verification
+## Verification and image maintenance
 
-Inside the workshop container (the source directory is bind-mounted):
-
-```bash
-source /opt/ros/jazzy/setup.bash
-cd /home/ubuntu/turtlebot3_ws/src/jupyter_notebooks/exercises
-python3 verify_intro_notebooks.py
-python3 verify_intro_notebooks.py --solutions --repeat 2
-ROS_DOMAIN_ID=88 python3 -m unittest discover -p 'test_*.py'
-python3 verify_intro_cli.py
-python3 verify_intro_gazebo.py --gui
-```
-
-The notebook runner uses fresh kernels and a separate ROS domain (87), starts real
-GUI turtlesim processes, and writes executed notebooks/reports to
-`/tmp/intro-notebook-verification`. It excludes manual CLI/teleop and optional Gazebo
-cells. It clicks every widget button through its real handler, checks signed movement
-and final stop, verifies all four corners and closure of the square, drives to all
-three checkpoints without teleporting, and requires false → true → false delivery
-results after actual motion. `--repeat 2` checks a full rerun in the same kernel.
-The ten helper regressions cover variable
-scan geometry/invalid readings, spin-dependent timers, real services, unavailable
-and unresponsive servers, stopping on callback failure, and stamped commands.
-Thirteen additional solvability regressions check the instructor functions,
-two-dimensional delivery geometry and boundary conditions, unknown/stale positions,
-unfinished-task gating, receipt uniqueness, and simulator reuse/ownership. Together
-with the existing advanced-course regressions, all 92 tests passed in the container.
-
-The CLI verifier passed 24 checks using real controlling terminals for all four
-turtlesim arrows and TurtleBot keyboard
-input, verifies documented graph/introspection commands, observes a published arc,
-and checks an external radio subscriber, Trigger service client and GetParameters
-request. It writes a report to `/tmp/intro-cli-verification`. The Gazebo verifier
-launches the actual world, receives a nonblank 640×480 camera image and 360-sample
-scan, runs the notebook's optional laser cell, drives with simulation-stamped
-TwistStamped messages, and checks odometry and stop. `--gui` also opens RViz, Plot
-and Node Graph and saves a desktop screenshot. GUI screenshots were inspected:
-RViz received the camera image, Plot traced the actual movement followed by a flat
-line after stop, and the graph rendered the real nodes. Reports and
-images go to `/tmp/intro-gazebo-verification`. Both verifiers use separate domains,
-bounded waits, and stop only their own launched process groups. Do not use their
-domains for a simultaneous student session.
-
-Fresh Gazebo verification also checks that its ROS domain is unused before launch.
-A collision probe correctly refused to launch or publish into an active simulation;
-the original verifier completed normally. Cleanup still stops owned processes if
-ROS lab shutdown raises, and CLI cleanup was checked with a stubborn child process
-whose launcher had already exited.
-
-The NumPy fix was applied and tested in the running container. A refreshed Docker
-image must be built and published before ordinary `docker compose up` users receive
-it; editing a Dockerfile does not update the existing Docker Hub image. The image
-recipes now check imports during build; a complete image rebuild is a separate
-release step. See [NumPy's ABI troubleshooting guidance](https://numpy.org/doc/stable/user/troubleshooting-importerror.html).
+The added automated tests, notebook runners, CLI/Gazebo probes, image recipes and
+the detailed verification record live on the
+[dev branch](https://github.com/AdoHaha/ros_fun/tree/dev). They supported the review;
+students run the lesson notebooks and their visible task checks directly.
 
 Manual classroom checks still matter: draw a recognizable letter, pair up on the
 classroom setup for the radio challenge, and observe how beginners use the controls.

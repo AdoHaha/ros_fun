@@ -46,9 +46,10 @@ Inside the sourced Jazzy workshop container, from `jupyter_notebooks`:
 ```bash
 python3 -m unittest discover -s robo_restaurant/tests -v
 python3 robo_restaurant/tools/verify_notebooks.py --output /tmp/restaurant-notebooks
-python3 robo_restaurant/tools/verify_execution_bridge.py --repeat 2
-python3 robo_restaurant/tools/verify_execution_bridge.py --solutions --repeat 2
 ```
+
+Additional executor regressions and the exercise-15 notebook runner live on the
+[dev branch](https://github.com/AdoHaha/ros_fun/tree/dev).
 
 The runner executes the three student demonstrations and confirms that unanswered
 exercise cells remain marked TODO. Executed copies go to the output folder.
