@@ -114,7 +114,9 @@ class IntroLab:
         """Reuse an existing simulator; stop only a process started by this lab."""
         client = self.node.create_client(TeleportAbsolute, '/turtle1/teleport_absolute')
         try:
-            if client.wait_for_service(timeout_sec=1.0):
+            # A fresh DDS participant may need several seconds to discover an
+            # existing simulator, especially while Gazebo loads on a slow host.
+            if client.wait_for_service(timeout_sec=5.0):
                 print('Używam uruchomionego turtlesim. Zatrzymaj pozostałe programy sterujące żółwiem.')
                 return
         finally:

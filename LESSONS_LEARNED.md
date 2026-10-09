@@ -28,10 +28,26 @@ Notes for future work in this repository and its Docker ROS/Jupyter environment.
   checkpoint, and confirms false → true → duplicate-refused delivery responses.
   Student notebooks run with unfinished tasks; instructor answers are injected
   only into generated solved copies. Full solved runs also repeat in one kernel.
-- The exercise regression suite passed 79 tests, including 10 new sensor/lifecycle
-  regressions. Fresh-kernel notebook runs and local HTML previews were checked.
-  Manual teleop/pair play and optional Gazebo extensions still require classroom
-  testing; automated execution does not measure whether students enjoy the games.
+- The exercise regression suite passed 92 tests, including 10 sensor/lifecycle
+  and 13 task/boundary/ownership regressions. The verifier checks every control
+  button, all square corners and closure, and checkpoint collection by driving.
+- `verify_intro_cli.py` passed 24 live keyboard/CLI/radio/service checks.
+  `verify_intro_gazebo.py --gui` checked the real world, camera, laser notebook
+  cell, simulation-stamped movement, odometry and stop. RViz camera, Plot curve
+  and Node Graph were inspected on the desktop. Classroom pair networking and
+  beginner enjoyment still require testing with students.
+- Jazzy turtlesim advances a fixed 16 ms physics step per Qt timer update. Under
+  heavy Gazebo/GUI load, a one-second wall-time command can produce a smaller
+  turn than expected. Close the optional Gazebo/RViz/rqt before core turtle
+  missions; preserve this honest open-loop limitation rather than hiding pose
+  feedback inside the publisher lesson. The subscriber lesson introduces pose.
+- Allow several seconds for DDS discovery before deciding an existing turtlesim
+  is absent; one second started duplicate simulators under load. A fresh-context
+  regression checks reuse and ensures a borrower cannot close the owner's robot.
+- NumPy 2 in the prebuilt image broke Ubuntu's Matplotlib extension and rqt Plot.
+  Both Docker recipes pin NumPy 1.26.4 and check Matplotlib/OpenCV imports. The
+  running container was repaired for validation; Docker Hub still needs a new
+  image release before ordinary Compose users receive that fix.
 
 ## Behavior tree workshop verification (2026-10-08)
 

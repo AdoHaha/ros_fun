@@ -55,34 +55,18 @@ def main():
                                     'assert not odpowiedz_druga.success\n'
                                     'assert bilet["numer"] == 1')
         for cell in notebook.cells:
+            if args.solutions and cell.metadata.get('intro_task') == 'square':
+                cell.source = ('from intro_live_checks import begin_square, check_square\n'
+                               'square_probe, square_start = begin_square(lab)\n'
+                               + cell.source + '\ncheck_square(square_probe, square_start)')
             if 'intro-widget' in cell.metadata.get('tags', []):
-                # Trigger the actual widget callback and observe ROS motion.
-                cell.source += '''
-from turtlesim.msg import Pose as ProbePose
-probe = {'pose': None}
-probe_subscription = node.create_subscription(ProbePose, '/turtle1/pose', lambda msg: probe.update(pose=msg), 10)
-lab.wait_for(lambda: probe['pose'] is not None, description='widget motion probe')
-before_click = probe['pose']
-przyciski[1][0].click()  # actual Forward button callback
-lab.spin_for(0.1)
-after_click = probe['pose']
-assert ((after_click.x-before_click.x)**2 + (after_click.y-before_click.y)**2)**0.5 > 0.1
-assert abs(after_click.linear_velocity) < 0.01
-node.destroy_subscription(probe_subscription)
-'''
+                cell.source += ('\nfrom intro_live_checks import check_panel\n'
+                                'check_panel(lab, przyciski)')
                 if args.solutions and path.name.startswith('4.'):
-                    cell.source += '''
-from turtlesim.srv import TeleportAbsolute as ProbeTeleport
-for target_x, target_y in cele.values():
-    lab.call(ProbeTeleport, '/turtle1/teleport_absolute', ProbeTeleport.Request(x=target_x, y=target_y, theta=0.0))
-    lab.spin_for(0.2)
-assert odwiedzone == {'A', 'B', 'C'}
-lab.spin_for(0.2)
-assert len(odwiedzone) == 3
-pokaz_stan()
-assert '<svg' in status.value
-'''
-        client = NotebookClient(notebook, timeout=60, kernel_name='python3',
+                    cell.source += ('\nfrom intro_live_checks import drive_checkpoints\n'
+                                    'drive_checkpoints(lab, ruch, cele, odwiedzone, pokaz_stan)\n'
+                                    'assert "<svg" in status.value')
+        client = NotebookClient(notebook, timeout=90, kernel_name='python3',
                                 resources={'metadata': {'path': str(exercises)}})
         dest = args.output / (('solved-' if args.solutions else 'student-') + path.name)
         with client.setup_kernel(cwd=str(exercises)):
