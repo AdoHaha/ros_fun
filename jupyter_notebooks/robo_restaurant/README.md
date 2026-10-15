@@ -7,6 +7,9 @@ and replace plans when their assumptions become false.
 
 ## Run the starter
 
+Use Python 3.12 from the Jazzy workshop container. The symbolic demos need no
+running ROS or Gazebo; the execution bridge requires Python 3.10 or newer.
+
 From `jupyter_notebooks` (the notebook server's root):
 
 ```bash
@@ -28,7 +31,8 @@ state publisher yet. This milestone tests task effects before adding driving.
 
 ## Student notebooks and separate instructor solutions
 
-Open the `exercises/` folder in Jupyter and continue with the Polish notebooks 12–15:
+Open the `exercises/` folder in Jupyter: planning notebooks 12–14 are in English,
+and the optional execution bridge in notebook 15 is in Polish.
 
 1. [Normal service](<../exercises/12. Robo Restaurant - Normal Service.ipynb>): audit a plan and reject illegal actions.
 2. [Low battery](<../exercises/13. Robo Restaurant - Low Battery.ipynb>): report charging requirements and infeasibility.

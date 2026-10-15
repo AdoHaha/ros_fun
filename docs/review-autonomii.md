@@ -1,5 +1,9 @@
 # Review ćwiczeń dotyczących autonomii
 
+Ten raport opisuje pierwotny przegląd i poprawki z 15 października. Wyniki
+integracji z nowszym `master` oraz ponownej weryfikacji są w
+[raporcie wydania](release-autonomy-2026-10-16.md).
+
 Data: 2026-10-15. Zakres: notebooki 6–14 w `jupyter_notebooks/exercises/`,
 ich zależności i wejście ze spisu treści. Review dotyczy możliwości przejścia
 materiału po kolei, poprawności przykładów oraz kompletności poleceń.
