@@ -1,12 +1,35 @@
-FROM adohaha/fun_ros:jazzy
-LABEL maintainer igorzubrycki@gmail.com
-
+# Incremental release: keep both published architecture bases and layer the
+# current lessons plus the Jupyter frontend repair on top. The digest identifies
+# the previous NumPy-compatible release, rather than the mutable tag we publish.
+ARG BASE_IMAGE=adohaha/fun_ros@sha256:5211658bfbd3994453bdd61ba5f6fd24e1d9bf71389cd313744b2e0f85c61c85
+FROM ${BASE_IMAGE}
+LABEL maintainer="igorzubrycki@gmail.com"
 
 USER root
+SHELL ["/bin/bash", "-c"]
 
-RUN apt-get update -q && \
-    apt-get install -y --no-install-recommends python3-bqplot python3-tornado && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN if ! command -v dot >/dev/null; then \
+      apt-get update -q && apt-get install -y --no-install-recommends graphviz && \
+      rm -rf /var/lib/apt/lists/*; \
+    fi && \
+    python3 -m pip install --break-system-packages --no-cache-dir --no-deps \
+      jupyterlab_widgets==3.0.9 && \
+    python3 -m pip install --break-system-packages --no-cache-dir --no-deps \
+      --ignore-installed widgetsnbextension==4.0.9
+
+ENV PYTHONPATH=/usr/lib/python3/dist-packages
+WORKDIR /home/ubuntu/turtlebot3_ws
+COPY --chown=ubuntu:ubuntu ./jupyter_notebooks /home/ubuntu/turtlebot3_ws/src/jupyter_notebooks
+COPY --chown=ubuntu:ubuntu ./run_jupyter.sh /home/ubuntu/run_jupyter.sh
+COPY --chown=ubuntu:ubuntu ./setup.bash /home/ubuntu/setup.bash
+COPY --chown=ubuntu:ubuntu ./jupyter_notebook_config.py /home/ubuntu/.jupyter/jupyter_notebook_config.py
+COPY ./jupyter.supervisor.conf /etc/supervisor/conf.d/jupyter.conf
 
 USER ubuntu
+RUN /home/ubuntu/setup.bash
+USER root
+RUN unset PYTHONPATH && \
+    jupyter-nbextension install rise --py --sys-prefix && \
+    jupyter nbextension enable rise --py --sys-prefix && \
+    jupyter nbextension install --py widgetsnbextension --sys-prefix && \
+    jupyter nbextension enable --py widgetsnbextension --sys-prefix

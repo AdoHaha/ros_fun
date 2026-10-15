@@ -7,6 +7,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV ROS_DISTRO=jazzy
 ENV TURTLEBOT3_MODEL=waffle_pi
 ENV DISPLAY=:1.0
+# Keep apt-built OpenCV/cv_bridge on Ubuntu's compatible NumPy, including
+# when the base image has a newer pip-installed copy in /usr/local.
+ENV PYTHONPATH=/usr/lib/python3/dist-packages
 
 USER root
 
@@ -64,7 +67,10 @@ RUN /home/ubuntu/setup.bash
 
 USER root
 
-RUN jupyter-nbextension install rise --py --sys-prefix && \
+# Install frontend assets from the pip packages. Ubuntu's Python shim has no
+# widgetsnbextension/static; runtime still prefers Ubuntu's NumPy via ENV above.
+RUN unset PYTHONPATH && \
+    jupyter-nbextension install rise --py --sys-prefix && \
     jupyter nbextension enable rise --py --sys-prefix && \
     jupyter nbextension install --py widgetsnbextension --sys-prefix && \
     jupyter nbextension enable --py widgetsnbextension --sys-prefix

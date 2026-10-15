@@ -1,6 +1,10 @@
 services:
     ros2:
         image: adohaha/fun_ros:jazzy
+        environment:
+            # OpenCV and cv_bridge use Ubuntu's NumPy 1 ABI. Prefer the apt
+            # packages over an incompatible NumPy installed in /usr/local.
+            PYTHONPATH: /usr/lib/python3/dist-packages
         volumes:
             - ./jupyter_notebooks:/home/ubuntu/turtlebot3_ws/src/jupyter_notebooks
             - ./gazebo:/home/ubuntu/.gazebo

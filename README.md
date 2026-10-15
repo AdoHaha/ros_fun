@@ -54,10 +54,10 @@ docker compose pull ros2
 docker compose up -d ros2
 ```
 
-The image repair fixes NumPy compatibility with the plotting and camera tools.
-With the previous Hub image cached, the added download is about 22 MB on
-Intel/AMD or 18 MB on ARM. Older cached releases may also need earlier base
-updates. Pulling does not
+The image repair fixes NumPy compatibility with the plotting and camera tools
+and restores the Jupyter widget frontend. Docker downloads only layers missing
+from your local cache; the amount depends on your previous image and platform.
+Pulling does not
 update a running container; `up -d` recreates it when its image changes. Your
 notebooks are stored in the repository's mounted folder and persist across
 container recreation.
@@ -76,7 +76,8 @@ changes, suggested pacing and verification commands.
 
 ## From driving to autonomous decisions
 
-The student descriptions in exercises 1–15 are Polish. Exercises **6–8** continue
+The student descriptions in exercises 1–11 and 15 are Polish; planning exercises
+12–14 remain in English. Exercises **6–8** continue
 the courier story: an optional Nav2 delivery route, a standalone turtlesim compass
 challenge using actions, and configurable delivery rules using parameters. Nav2
 is optional; exercises 7–8 do not require Gazebo or exercise 6's setup.
