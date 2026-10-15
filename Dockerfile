@@ -7,6 +7,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV ROS_DISTRO=jazzy
 ENV TURTLEBOT3_MODEL=waffle_pi
 ENV DISPLAY=:1.0
+# Keep apt-built OpenCV/cv_bridge on Ubuntu's compatible NumPy, including
+# when the base image has a newer pip-installed copy in /usr/local.
+ENV PYTHONPATH=/usr/lib/python3/dist-packages
 
 USER root
 
