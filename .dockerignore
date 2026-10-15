@@ -1,0 +1,9 @@
+.git
+**/__pycache__
+**/*.pyc
+**/.ipynb_checkpoints
+gazebo
+jupyter_notebooks/gazebo
+**/build
+**/install
+**/log

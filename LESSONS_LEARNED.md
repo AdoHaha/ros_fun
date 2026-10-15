@@ -2,6 +2,54 @@
 
 Notes for future work in this repository and its Docker ROS/Jupyter environment.
 
+## Behavior tree workshop verification (2026-10-08)
+
+- Exercises 9–11 now teach decisions across ticks: reactive guards, workflow
+  memory, parallel completion, finite recovery, action cancellation and ownership.
+  Students edit and execute notebook cells, including demos, diagrams and cleanup.
+- Reference notebooks in `exercises/.solutions/` contain executable solutions.
+  The deterministic checks also reject the deliberately incorrect student
+  starters and memory mutations; a printed tree alone is not verification.
+- `py_trees` DOT/SVG diagrams come from the actual tree objects. Generated files
+  are placed under `/tmp/ros_fun_bt_diagram_*`, outside notebook sources.
+- Use `exercises/verify_bt_notebooks.py --ros` for fresh-kernel notebook runs.
+  It executes mock ROS only for the solved application; unfinished student ROS
+  cells require their task checks to pass before launching anything.
+- `BasicNavigator` must have `use_sim_time=True` before stamping poses in Gazebo.
+  Its `cancelTask()` waits for acknowledgement, not the terminal action result.
+  The demo polls completion before allowing another leaf to reuse the navigator.
+- A reactive selector ticks the new higher priority branch before invalidating
+  the old lower priority branch. Explicit action ownership prevents the old
+  leaf's cleanup from canceling the new goal. A single LED output publisher
+  emits the final selected color after invalidation finishes.
+- `ScanContext` now uses asynchronous get/set/restore callbacks. Tutorial six
+  gates rotation on confirmed context readiness. The executor must keep spinning
+  for restoration callbacks after branch invalidation.
+- The mock ROS solution was executed end to end: action success, server-confirmed
+  cancellation, battery interruption and resumed completion. Tutorial six was
+  also checked against real parameter services and a real mock action server.
+- On this host Gazebo ran around 0.05 of real time. Notebook eleven measures
+  `/clock` progress to make this visible. The default goal faces the approach
+  direction to avoid a long final rotation; the existing castle world is used.
+- Live notebook eleven completed patrol → requested goal → successful result →
+  resumed patrol → stop. The final motion probe recorded 1.21 m, 715 nonzero velocity
+  samples and a final zero command. Waiting for terminal cancellation eliminated
+  the immediate goal failure observed during the earlier priority handoff.
+- The live status view uses an HTML widget rather than repeatedly clearing an
+  Output widget from a background thread; the latter broke nbclient output capture.
+- Beginner-facing tasks include definitions, expected traces, optional hints and
+  separate recovery/resource checks. Notebook eleven is explicitly an extension.
+- All six student/reference notebooks passed fresh-kernel execution, including
+  the mock ROS solution. The 69 regression tests cover the task checks, ROS
+  adapter, asynchronous context, navigation ownership/readiness and notebook
+  command timeouts (including termination of child pipelines).
+- Nav2 startup, parameter/costmap services and action acknowledgements have wall
+  deadlines. Missing idempotent service replies are retried; a goal accepted
+  after a send timeout is canceled rather than left without an owner.
+- The Nav2 notebook checks readiness using one persistent ROS client, rather
+  than a pipeline of fresh CLI processes whose discovery may time out.
+- The kitchen world and planning exercises are separate work.
+
 ## Docker and ROS Environment
 
 - The working container is named `ros_fun`.

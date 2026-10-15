@@ -20,7 +20,7 @@ on :meth:`~py_trees.behaviour.Behaviour.terminate`). Refer to :term:`context swi
 for more detail.
 
 In this example it will enable a hypothetical safety sensor pipeline, necessary
-necessary for dangerous but slow moving rotational maneuvres not required for
+for dangerous but slow moving rotational maneuvres not required for
 normal modes of travel (suppose we have a large rectangular robot that is
 ordinarily blind to the sides - it may need to take advantage of noisy
 sonars to the sides or rotate forward facing sensing into position before
@@ -50,7 +50,8 @@ The :class:`ros_fun_py_trees_ros_tutorials.behaviours.ScanContext` is the
 context switching behaviour constructed for this tutorial.
 
 * :meth:`~ros_fun_py_trees_ros_tutorials.behaviours.ScanContext.initialise()`: trigger a sequence service calls to cache and set the /safety_sensors/enabled parameter to True
-* :meth:`~ros_fun_py_trees_ros_tutorials.behaviours.ScanContext.update()`: complete the chain of service calls & maintain the context
+* Service completion callbacks advance the get/set chain without blocking a tree tick.
+* :meth:`~ros_fun_py_trees_ros_tutorials.behaviours.ScanContext.update()`: maintain the context, or return FAILURE when a service request fails
 * :meth:`~ros_fun_py_trees_ros_tutorials.behaviours.ScanContext.terminate()`: reset the parameter to the cached value
 
 
@@ -62,11 +63,13 @@ Context Switching
 
 On entry into the parallel, the :class:`~ros_fun_py_trees_ros_tutorials.behaviours.ScanContext`
 behaviour will cache and switch
-the safety sensors parameter. While in the parallel it will return with
+the safety sensors parameter. A sequence waits for the confirmed context before
+sending the rotation goal. While in the parallel the context will return with
 :data:`~py_trees.common.Status.RUNNING` indefinitely. When the rotation
 action succeeds or fails, it will terminate the parallel and subsequently
 the :class:`~ros_fun_py_trees_ros_tutorials.behaviours.ScanContext` will terminate,
-resetting the safety sensors parameter to it's original value.
+resetting the safety sensors parameter to its original value. Restoration is
+asynchronous: keep the ROS executor spinning while the response is pending.
 
 Running
 ^^^^^^^
@@ -127,6 +130,21 @@ def generate_launch_description():
 ##############################################################################
 # Tutorial
 ##############################################################################
+
+
+class WaitForScanContext(py_trees.behaviour.Behaviour):
+    """Gate the rotation until its parallel context has been confirmed."""
+
+    def __init__(self, context):
+        super().__init__(name="Wait for Scan Context")
+        self.context = context
+
+    def update(self):
+        if self.context.context_ready:
+            self.feedback_message = "scan context confirmed"
+            return py_trees.common.Status.SUCCESS
+        self.feedback_message = "waiting for the safety sensors context"
+        return py_trees.common.Status.RUNNING
 
 
 def tutorial_create_root() -> py_trees.behaviour.Behaviour:
@@ -196,10 +214,6 @@ def tutorial_create_root() -> py_trees.behaviour.Behaviour:
             )
         )
     )
-    scanning = py_trees.composites.Parallel(
-        name="Scanning",
-        policy=py_trees.common.ParallelPolicy.SuccessOnOne()
-    )
     scan_context_switch = behaviours.ScanContext("Context Switch")
     scan_rotate = py_trees_ros.actions.ActionClient(
         name="Rotate",
@@ -207,6 +221,17 @@ def tutorial_create_root() -> py_trees.behaviour.Behaviour:
         action_name="rotate",
         action_goal=py_trees_actions.Rotate.Goal(),
         generate_feedback_message=lambda msg: "{:.2f}%%".format(msg.feedback.percentage_completed)
+    )
+    guarded_scan = py_trees.composites.Sequence(
+        name="Scan after Context Ready",
+        memory=True,
+        children=[WaitForScanContext(scan_context_switch), scan_rotate]
+    )
+    scanning = py_trees.composites.Parallel(
+        name="Scanning",
+        policy=py_trees.common.ParallelPolicy.SuccessOnSelected(
+            children=[guarded_scan], synchronise=False
+        )
     )
     flash_blue = behaviours.FlashLedStrip(
         name="Flash Blue",
@@ -227,7 +252,7 @@ def tutorial_create_root() -> py_trees.behaviour.Behaviour:
     tasks.add_children([battery_emergency, scan, idle])
     scan.add_children([is_scan_requested, scan_preempt, scan_celebrate])
     scan_preempt.add_children([is_scan_requested_two, scanning])
-    scanning.add_children([scan_context_switch, scan_rotate, flash_blue])
+    scanning.add_children([scan_context_switch, guarded_scan, flash_blue])
     scan_celebrate.add_children([flash_green, scan_pause])
     return root
 

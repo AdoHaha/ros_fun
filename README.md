@@ -2,7 +2,7 @@
 
 Robotics is fun and ROS 2 is a must.
 
-In this workshop, we will play around with ROS 2 and Simulating some robots
+In this workshop, we will explore ROS 2 by playing with simulated robots.
 
 You need to have Docker and docker compose installed.
 It can be docker engine:
@@ -37,26 +37,81 @@ access the jupyter notebooks by navigating to:
 
 on your **host** machine. 
 
-From there open [*exercises folder*](http://localhost:8888/exercises/1.%20introduction.ipynb) to access introduction
+Open [exercise 1](http://localhost:8888/notebooks/exercises/1.%20introduction.ipynb)
+in Jupyter to start the workshop.
 
 The demo uses ROS 2 Jazzy on Ubuntu 24.04.
+
+## Updating an existing workshop installation
+
+Save your work in Jupyter and back up edited notebooks before updating the
+repository. Finish any running robot commands, then run these commands in the
+repository folder on your computer:
+
+```bash
+git pull --ff-only
+docker compose pull ros2
+docker compose up -d ros2
+```
+
+The image repair fixes NumPy compatibility with the plotting and camera tools.
+With the previous Hub image cached, the added download is about 22 MB on
+Intel/AMD or 18 MB on ARM. Older cached releases may also need earlier base
+updates. Pulling does not
+update a running container; `up -d` recreates it when its image changes. Your
+notebooks are stored in the repository's mounted folder and persist across
+container recreation.
+
+## Beginner workshop: exercises 1–5
+
+The Polish notebooks start with a robot courier game in **turtlesim**: drive and
+sketch, send radio messages, build a control panel, collect position-based points,
+and implement a service that confirms a delivery. Each mission includes explanations,
+small challenges, expected results, hints and cleanup. TurtleBot/Gazebo and laser
+activities are optional extensions so slow simulation does not block the core workshop.
+
+Start with [exercise 1](jupyter_notebooks/exercises/1.%20introduction.ipynb).
+The [review and teaching guide](notes/beginner-workshop-review.md) describes the
+changes, suggested pacing and verification commands.
+
+## From driving to autonomous decisions
+
+The student descriptions in exercises 1–11 and 15 are Polish; planning exercises
+12–14 remain in English. Exercises **6–8** continue
+the courier story: an optional Nav2 delivery route, a standalone turtlesim compass
+challenge using actions, and configurable delivery rules using parameters. Nav2
+is optional; exercises 7–8 do not require Gazebo or exercise 6's setup.
+
+Exercises **9–15** belong to the separate advanced course and include a short
+ROS recap. The connections are explicit: subscribers supply observations,
+parameters configure rules, and actions remain running until their result arrives.
+Behavior trees choose priorities and handle interruption; planners select an
+action sequence from the observed state. The final optional bridge practices
+execution, bounded retry and replanning before adding a restaurant ROS adapter.
+
+## Behavior tree lab
+
+Behavior tree exercises start with `exercises/9. Behavior Trees.ipynb`: a small
+deterministic demo and tasks about reactivity, memory and parallel work.
+Exercise 10 connects the solved tree to the mock ROS robot; exercise 11 uses
+the TurtleBot world in Gazebo with Nav2. Executable instructor solutions and
+verification commands are in [the solutions guide](jupyter_notebooks/exercises/.solutions/README.md).
 
 ## Autonomous planning lab
 
 The [Robo-restaurant starter](jupyter_notebooks/robo_restaurant/README.md)
 starts with numbered notebooks **12–14 in `exercises/`** and includes a Gazebo
 restaurant world and demos on resources, device failures and replanning. The demos run without
-ROS; connecting the planner to a navigating waiter is a later milestone.
+ROS. Optional **exercise 15** adds a controlled executor with running, success,
+failure and cancellation outcomes. Connecting it to a navigating waiter remains
+a later milestone.
 
-## Maintainer image build
+## Development and image maintenance
 
-The workshop compose file expects a prebuilt Docker Hub image so participants do
-not compile or install ROS packages locally. To publish a refreshed image, use:
-
-`make release`
-
-By default this builds and pushes `adohaha/fun_ros:jazzy`. Override the tag with
-`make release IMAGE=adohaha/fun_ros:<tag>`.
+Additional regression tests, verification runners and Docker image repairs are
+maintained on the [dev branch](https://github.com/AdoHaha/ros_fun/tree/dev).
+The master branch contains the teaching materials and the helpers needed to run
+them, alongside the repository's pre-existing infrastructure.
 
 ---
 

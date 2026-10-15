@@ -1,0 +1,3 @@
+{
+  "recovery_policy": "def recovery_policy(executor):\n    if executor.status is not Status.FAILURE:\n        raise ValueError('Polityka wymaga statusu FAILURE')\n    if executor.failure_reason == 'cancelled':\n        return {'mode': 'stopped', 'plan': None, 'cost': None}\n    if executor.can_retry:\n        return {'mode': 'retry', 'plan': [executor.action], 'cost': None}\n    plan, cost = solve(executor.state)\n    if plan is None:\n        return {'mode': 'blocked', 'plan': None, 'cost': None}\n    return {'mode': 'replan', 'plan': plan, 'cost': cost}"
+}

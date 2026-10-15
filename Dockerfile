@@ -24,6 +24,7 @@ RUN apt-get update -q && \
       python3-bqplot \
       python3-flask \
       python3-natsort \
+      graphviz \
       ros-jazzy-cartographer \
       ros-jazzy-cartographer-ros \
       ros-jazzy-navigation2 \
@@ -66,7 +67,10 @@ RUN /home/ubuntu/setup.bash
 
 USER root
 
-RUN jupyter-nbextension install rise --py --sys-prefix && \
+# Install frontend assets from the pip packages. Ubuntu's Python shim has no
+# widgetsnbextension/static; runtime still prefers Ubuntu's NumPy via ENV above.
+RUN unset PYTHONPATH && \
+    jupyter-nbextension install rise --py --sys-prefix && \
     jupyter nbextension enable rise --py --sys-prefix && \
     jupyter nbextension install --py widgetsnbextension --sys-prefix && \
     jupyter nbextension enable --py widgetsnbextension --sys-prefix

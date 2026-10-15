@@ -1,0 +1,3 @@
+{
+  "navigation_route": "def trasa_dostawy():\n    return [ODBIOR, BAZA]\n\ntrasa = trasa_dostawy()\ntrasa_gotowa = trasa == [ODBIOR, BAZA]\nprint('✓ Trasa gotowa.' if trasa_gotowa else 'Sprawdź kolejność punktów.')"
+}
